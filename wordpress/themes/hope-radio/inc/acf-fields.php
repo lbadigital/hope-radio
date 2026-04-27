@@ -228,16 +228,20 @@ add_filter('acf/location/rule_match/nav_menu_item', function ($match, $rule, $sc
 }, 10, 4);
 
 acf_add_local_field_group([
-    'key'    => 'group_top_menu_item',
-    'title'  => 'Icône — Top Menu',
+    'key'                              => 'group_top_menu_item',
+    'title'                            => 'Icône — Top Menu',
+    'show_in_graphql'                  => true,
+    'graphql_field_name'               => 'topMenuIcon',
+    'map_graphql_types_from_location_rules' => true,
     'fields' => [
         [
-            'key'           => 'field_top_menu_item_icone',
-            'label'         => 'Icône',
-            'name'          => 'icone',
-            'type'          => 'image',
-            'return_format' => 'array',
-            'preview_size'  => 'thumbnail',
+            'key'             => 'field_top_menu_item_icone',
+            'label'           => 'Icône',
+            'name'            => 'icone',
+            'type'            => 'image',
+            'return_format'   => 'array',
+            'preview_size'    => 'thumbnail',
+            'show_in_graphql' => true,
         ],
     ],
     'location' => [
@@ -246,16 +250,20 @@ acf_add_local_field_group([
 ]);
 
 acf_add_local_field_group([
-    'key'    => 'group_reseaux_menu_item',
-    'title'  => 'Icône — Réseaux sociaux',
+    'key'                              => 'group_reseaux_menu_item',
+    'title'                            => 'Icône — Réseaux sociaux',
+    'show_in_graphql'                  => true,
+    'graphql_field_name'               => 'reseauxMenuIcon',
+    'map_graphql_types_from_location_rules' => true,
     'fields' => [
         [
-            'key'           => 'field_reseaux_menu_item_icone',
-            'label'         => 'Icône',
-            'name'          => 'icone',
-            'type'          => 'image',
-            'return_format' => 'array',
-            'preview_size'  => 'thumbnail',
+            'key'             => 'field_reseaux_menu_item_icone',
+            'label'           => 'Icône',
+            'name'            => 'icone',
+            'type'            => 'image',
+            'return_format'   => 'array',
+            'preview_size'    => 'thumbnail',
+            'show_in_graphql' => true,
         ],
     ],
     'location' => [

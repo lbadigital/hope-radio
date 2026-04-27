@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@font-face {
+  font-family: 'Century Gothic';
+  src: url('/fonts/CenturyGothic.woff2') format('woff2'),
+    url('/fonts/CenturyGothic.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gravesend Sans';
+  src: url('/fonts/GravesendSans-Bold.woff2') format('woff2'),
+    url('/fonts/GravesendSans-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gravesend Sans';
+  src: url('/fonts/GravesendSans-Inline.woff2') format('woff2'),
+    url('/fonts/GravesendSans-Inline.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gravesend Sans';
+  src: url('/fonts/GravesendSans-Light.woff2') format('woff2'),
+    url('/fonts/GravesendSans-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gravesend Sans';
+  src: url('/fonts/GravesendSans-Medium.woff2') format('woff2'),
+    url('/fonts/GravesendSans-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Copyright Radosaw ukasiewicz, radluka.com';
+  src: url('/fonts/Copyright-Radosaw-ukasiewicz-radlukacom.woff2') format('woff2'),
+    url('/fonts/Copyright-Radosaw-ukasiewicz-radlukacom.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-body: 'Century Gothic', sans-serif;
+  --font-heading: 'Gravesend Sans', sans-serif;
+  --font-nav: 'Copyright Radosaw ukasiewicz, radluka.com', serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: #720049;
+  --color-secondary: #E45612;
+  --color-tertiary: #2847AF;
+  --color-brand-yellow: #EEBB72;
+  --color-brand-violet: #320C52;
+  --color-brand-rose: #B929D8;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
 }
