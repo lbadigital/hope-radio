@@ -26,10 +26,10 @@ export default async function Header() {
   const [mainMenuData, topMenuData, logoData] = await Promise.all([
     fetchGraphQL<GetMainMenuData>(GET_MAIN_MENU).catch(() => null),
     fetchGraphQL<GetTopMenuData>(GET_TOP_MENU).catch(() => null),
-    fetchGraphQL<SiteLogoData>(GET_SITE_LOGO).catch(() => null),
+    fetchGraphQL<SiteLogoData>(GET_SITE_LOGO, undefined, { cache: 'no-store' }).catch(() => null),
   ]);
 
-const mainItems = mainMenuData?.menuItems.nodes ?? [];
+  const mainItems = mainMenuData?.menuItems.nodes ?? [];
   const topItems = topMenuData?.menuItems.nodes ?? [];
   const logo = logoData?.customLogo ?? null;
 
@@ -38,7 +38,7 @@ const mainItems = mainMenuData?.menuItems.nodes ?? [];
       <TopMenu items={topItems} />
       <div className="flex items-center gap-8">
         <Link href="/" className="shrink-0">
-          {logo ? (
+          {logo?.sourceUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={logo.sourceUrl}

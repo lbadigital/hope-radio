@@ -22,13 +22,31 @@ function after_setup_theme_hope_radio() {
 
 // Expose le logo du customizer via WPGraphQL
 add_action('graphql_register_types', function () {
+    register_graphql_object_type('SiteLogo', [
+        'description' => 'Logo du site',
+        'fields'      => [
+            'sourceUrl' => ['type' => 'String'],
+            'altText'   => ['type' => 'String'],
+        ],
+    ]);
+
     register_graphql_field('RootQuery', 'customLogo', [
-        'type'        => 'MediaItem',
+        'type'        => 'SiteLogo',
         'description' => 'Logo du site défini dans Apparence > Personnaliser',
         'resolve'     => function () {
+
             $logo_id = get_theme_mod('custom_logo');
             if (!$logo_id) return null;
-            return get_post($logo_id);
+
+            $src = wp_get_attachment_url($logo_id);
+            $alt = get_post_meta($logo_id, '_wp_attachment_image_alt', true);
+
+            error_log('[customLogo] id=' . $logo_id . ' src=' . ($src ?: 'FALSE'));
+
+            return [
+                'sourceUrl' => $src ?: null,
+                'altText'   => $alt ?: null,
+            ];
         },
     ]);
 });

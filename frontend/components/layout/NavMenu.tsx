@@ -13,7 +13,7 @@ export default function NavMenu({ items }: NavMenuProps) {
           <li key={item.id}>
             <Link
               href={item.url}
-              className="text-white text-center text-[18px] font-[900] leading-[60px] font-nav"
+              className="text-white text-center text-[18px] font-[900] leading-[60px] font-nav px-6"
             >
               {item.label}
             </Link>

@@ -8,7 +8,7 @@ interface TopMenuProps {
 export default function TopMenu({ items }: TopMenuProps) {
   return (
     <nav>
-      <ul className="flex items-center gap-[18px]">
+      <ul className="flex items-center justify-end gap-[18px]">
         {items.map((item) => {
           const icone = item.topMenuIcon?.icone?.node ?? null;
           return (

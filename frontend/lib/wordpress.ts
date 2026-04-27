@@ -1,6 +1,7 @@
 export async function fetchGraphQL<T>(
   query: string,
-  variables?: Record<string, unknown>
+  variables?: Record<string, unknown>,
+  fetchOptions?: RequestInit
 ): Promise<T> {
   // WORDPRESS_API_URL = URL interne Docker (http://wordpress/graphql)
   // NEXT_PUBLIC_GRAPHQL_ENDPOINT = fallback pour dev hors Docker
@@ -13,6 +14,7 @@ export async function fetchGraphQL<T>(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables }),
     next: { revalidate: 3600 },
+    ...fetchOptions,
   });
 
   if (!res.ok) throw new Error(`GraphQL request failed: ${res.status}`);
