@@ -3,8 +3,10 @@ import { fetchGraphQL } from '@/lib/wordpress';
 import {
   GET_MAIN_MENU,
   GET_TOP_MENU,
+  GET_SOCIAL_MENU,
   type GetMainMenuData,
   type GetTopMenuData,
+  type GetSocialMenuData,
 } from '@/graphql/menus';
 import NavMenu from './NavMenu';
 import TopMenu from './TopMenu';
@@ -23,15 +25,17 @@ interface SiteLogoData {
 }
 
 export default async function Header() {
-  const [mainMenuData, topMenuData, logoData] = await Promise.all([
+  const [mainMenuData, topMenuData, logoData, socialMenuData] = await Promise.all([
     fetchGraphQL<GetMainMenuData>(GET_MAIN_MENU).catch(() => null),
     fetchGraphQL<GetTopMenuData>(GET_TOP_MENU).catch(() => null),
     fetchGraphQL<SiteLogoData>(GET_SITE_LOGO, undefined, { next: { revalidate: 3600 } }).catch(() => null),
+    fetchGraphQL<GetSocialMenuData>(GET_SOCIAL_MENU).catch(() => null),
   ]);
 
   const mainItems = mainMenuData?.menuItems.nodes ?? [];
   const topItems = topMenuData?.menuItems.nodes ?? [];
   const logo = logoData?.customLogo ?? null;
+  const socialItems = socialMenuData?.menuItems.nodes ?? [];
 
   return (
     <header className="bg-brand-violet px-8 py-4 flex flex-col gap-[20px]">
@@ -54,7 +58,7 @@ export default async function Header() {
           )}
         </Link>
         <div className="flex flex-col flex-1 gap-6">
-          <TopMenu items={topItems} />
+          <TopMenu items={topItems} socialItems={socialItems} />
           <NavMenu items={mainItems} />
         </div>
         

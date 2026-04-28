@@ -41,10 +41,30 @@ export const GET_TOP_MENU = /* GraphQL */ `
   }
 `;
 
+export const GET_SOCIAL_MENU = /* GraphQL */ `
+  query GetSocialMenu {
+    menuItems(where: { location: RESEAUX_SOCIAUX }) {
+      nodes {
+        id
+        label
+        url
+        topMenuIcon {
+          sourceUrl
+          altText
+        }
+      }
+    }
+  }
+`;
+
 export interface GetMainMenuData {
   menuItems: { nodes: MenuItem[] };
 }
 
 export interface GetTopMenuData {
+  menuItems: { nodes: TopMenuItem[] };
+}
+
+export interface GetSocialMenuData {
   menuItems: { nodes: TopMenuItem[] };
 }

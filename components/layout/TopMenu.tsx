@@ -5,9 +5,10 @@ import Image from 'next/image';
 
 interface TopMenuProps {
   items: TopMenuItem[];
+  socialItems?: TopMenuItem[];
 }
 
-export default function TopMenu({ items }: TopMenuProps) {
+export default function TopMenu({ items, socialItems = [] }: TopMenuProps) {
   return (
     <nav>
       <ul className="flex items-center justify-end gap-[18px]">
@@ -30,6 +31,28 @@ export default function TopMenu({ items }: TopMenuProps) {
                   />
                 )}
                 <span>{item.label}</span>
+              </Link>
+            </li>
+          );
+        })}
+
+        {socialItems.map((item, index) => {
+          const icone = item.topMenuIcon ?? null;
+          if (!icone?.sourceUrl) return null;
+          return (
+            <li key={item.id} className={index === 0 ? 'ml-8' : undefined}>
+              <Link
+                href={normalizeMenuUrl(item.url)}
+                aria-label={item.label}
+                className="flex items-center"
+              >
+                <Image
+                  src={icone.sourceUrl}
+                  alt={icone.altText || item.label}
+                  width={24}
+                  height={24}
+                  className="w-[24px] h-[24px] shrink-0"
+                />
               </Link>
             </li>
           );
