@@ -58,13 +58,25 @@
   --font-body: 'Century Gothic', sans-serif;
   --font-heading: 'Gravesend Sans', sans-serif;
   --font-nav: 'Copyright Radosaw ukasiewicz, radluka.com', serif;
+  --font-button: var(--font-archivo);
 
   --color-primary: #720049;
+  --color-primary-light: #B829D3;
   --color-secondary: #E45612;
   --color-tertiary: #2847AF;
   --color-brand-yellow: #EEBB72;
   --color-brand-violet: #320C52;
   --color-brand-rose: #B929D8;
+  --color-white:#FFFFFF;
+
+  --bg-primary: #720049;
+  --bg-primary-light: #B829D3;
+  --bg-secondary: #E45612;
+  --bg-tertiary: #2847AF;
+  --bg-brand-yellow: #EEBB72;
+  --bg-brand-violet: #320C52;
+  --bg-brand-rose: #B929D8;
+  --bg-white:#FFFFFF
 }
 
 body {

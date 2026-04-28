@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Archivo } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
+
+const archivo = Archivo({ subsets: ["latin"], weight: ["600"], variable: "--font-archivo" });
 
 export const metadata: Metadata = {
   title: "Hope Radio",
@@ -13,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="h-full antialiased">
+    <html lang="fr" className={`h-full antialiased ${archivo.variable}`}>
       <body className="min-h-full flex flex-col">
         <Header />
         {children}
