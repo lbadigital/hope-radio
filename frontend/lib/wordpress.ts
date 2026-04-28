@@ -1,3 +1,25 @@
+/**
+ * Normalise une URL de menu item en path relatif.
+ * Gère les URLs WordPress absolues et les paths relatifs saisis manuellement.
+ */
+export function normalizeMenuUrl(url: string): string {
+  if (!url) return '/';
+
+  // Déjà un path relatif (liens personnalisés saisis dans WP)
+  if (url.startsWith('/')) return url;
+
+  // Ancre seule
+  if (url.startsWith('#')) return url;
+
+  try {
+    const parsed = new URL(url);
+    // Retourne path + query + hash, sans le domaine
+    return parsed.pathname + parsed.search + parsed.hash;
+  } catch {
+    return url;
+  }
+}
+
 export async function fetchGraphQL<T>(
   query: string,
   variables?: Record<string, unknown>,

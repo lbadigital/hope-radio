@@ -195,6 +195,41 @@ acf_add_local_field_group([
     ],
 ]);
 
+// WPGraphQL for ACF ne sait pas résoudre les champs sur MenuItem.
+// On enregistre les champs directement via l'API WPGraphQL avec un resolver explicite.
+add_action('graphql_register_types', function () {
+    register_graphql_object_type('MenuItemIcon', [
+        'fields' => [
+            'sourceUrl' => ['type' => 'String'],
+            'altText'   => ['type' => 'String'],
+        ],
+    ]);
+
+    register_graphql_field('MenuItem', 'topMenuIcon', [
+        'type'    => 'MenuItemIcon',
+        'resolve' => function ($menu_item) {
+            $image = get_field('icone', $menu_item->databaseId);
+            if (empty($image)) return null;
+            return [
+                'sourceUrl' => $image['url'] ?? null,
+                'altText'   => $image['alt'] ?? null,
+            ];
+        },
+    ]);
+
+    register_graphql_field('MenuItem', 'reseauxMenuIcon', [
+        'type'    => 'MenuItemIcon',
+        'resolve' => function ($menu_item) {
+            $image = get_field('icone', $menu_item->databaseId);
+            if (empty($image)) return null;
+            return [
+                'sourceUrl' => $image['url'] ?? null,
+                'altText'   => $image['alt'] ?? null,
+            ];
+        },
+    ]);
+});
+
 // Scope each group to its target menu.
 // Uses location assignment when available, falls back to menu slug.
 // The 4th param ($field_group) is required to identify which group is being matched.
@@ -228,20 +263,16 @@ add_filter('acf/location/rule_match/nav_menu_item', function ($match, $rule, $sc
 }, 10, 4);
 
 acf_add_local_field_group([
-    'key'                              => 'group_top_menu_item',
-    'title'                            => 'Icône — Top Menu',
-    'show_in_graphql'                  => true,
-    'graphql_field_name'               => 'topMenuIcon',
-    'map_graphql_types_from_location_rules' => true,
+    'key'    => 'group_top_menu_item',
+    'title'  => 'Icône — Top Menu',
     'fields' => [
         [
-            'key'             => 'field_top_menu_item_icone',
-            'label'           => 'Icône',
-            'name'            => 'icone',
-            'type'            => 'image',
-            'return_format'   => 'array',
-            'preview_size'    => 'thumbnail',
-            'show_in_graphql' => true,
+            'key'           => 'field_top_menu_item_icone',
+            'label'         => 'Icône',
+            'name'          => 'icone',
+            'type'          => 'image',
+            'return_format' => 'array',
+            'preview_size'  => 'thumbnail',
         ],
     ],
     'location' => [
@@ -250,20 +281,16 @@ acf_add_local_field_group([
 ]);
 
 acf_add_local_field_group([
-    'key'                              => 'group_reseaux_menu_item',
-    'title'                            => 'Icône — Réseaux sociaux',
-    'show_in_graphql'                  => true,
-    'graphql_field_name'               => 'reseauxMenuIcon',
-    'map_graphql_types_from_location_rules' => true,
+    'key'    => 'group_reseaux_menu_item',
+    'title'  => 'Icône — Réseaux sociaux',
     'fields' => [
         [
-            'key'             => 'field_reseaux_menu_item_icone',
-            'label'           => 'Icône',
-            'name'            => 'icone',
-            'type'            => 'image',
-            'return_format'   => 'array',
-            'preview_size'    => 'thumbnail',
-            'show_in_graphql' => true,
+            'key'           => 'field_reseaux_menu_item_icone',
+            'label'         => 'Icône',
+            'name'          => 'icone',
+            'type'          => 'image',
+            'return_format' => 'array',
+            'preview_size'  => 'thumbnail',
         ],
     ],
     'location' => [

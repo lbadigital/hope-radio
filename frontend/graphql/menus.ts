@@ -4,15 +4,13 @@ export interface MenuItem {
   url: string;
 }
 
+export interface MenuItemIcon {
+  sourceUrl: string | null;
+  altText: string | null;
+}
+
 export interface TopMenuItem extends MenuItem {
-  topMenuIcon: {
-    icone: {
-      node: {
-        sourceUrl: string;
-        altText: string;
-      };
-    } | null;
-  } | null;
+  topMenuIcon: MenuItemIcon | null;
 }
 
 export const GET_MAIN_MENU = /* GraphQL */ `
@@ -35,12 +33,8 @@ export const GET_TOP_MENU = /* GraphQL */ `
         label
         url
         topMenuIcon {
-          icone {
-            node {
-              sourceUrl
-              altText
-            }
-          }
+          sourceUrl
+          altText
         }
       }
     }

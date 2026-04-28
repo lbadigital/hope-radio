@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { TopMenuItem } from '@/graphql/menus';
+import { normalizeMenuUrl } from '@/lib/wordpress';
 
 interface TopMenuProps {
   items: TopMenuItem[];
@@ -10,11 +11,11 @@ export default function TopMenu({ items }: TopMenuProps) {
     <nav>
       <ul className="flex items-center justify-end gap-[18px]">
         {items.map((item) => {
-          const icone = item.topMenuIcon?.icone?.node ?? null;
+          const icone = item.topMenuIcon ?? null;
           return (
             <li key={item.id}>
               <Link
-                href={item.url}
+                href={normalizeMenuUrl(item.url)}
                 className="flex items-center gap-[10px] text-white text-[12px] font-bold leading-[20px] font-heading"
               >
                 {icone && (
