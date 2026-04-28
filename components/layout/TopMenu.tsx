@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { TopMenuItem } from '@/graphql/menus';
 import { normalizeMenuUrl } from '@/lib/wordpress';
+import Image from 'next/image';
 
 interface TopMenuProps {
   items: TopMenuItem[];
@@ -20,8 +21,8 @@ export default function TopMenu({ items }: TopMenuProps) {
               >
                 {icone && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={icone.sourceUrl}
+                  <Image
+                    src={icone.sourceUrl as string}
                     alt={icone.altText || item.label}
                     width={24}
                     height={24}
