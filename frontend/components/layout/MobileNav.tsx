@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { MenuItem } from '@/graphql/menus';
 import { normalizeMenuUrl } from '@/lib/wordpress';
+import { usePlayerStore } from '@/store/playerStore';
 
 interface MobileNavProps {
   items: MenuItem[];
@@ -13,9 +14,7 @@ interface MobileNavProps {
 
 export default function MobileNav({ items, logoSrc, logoAlt }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
-
-  const radioItem = items.find(item => item.label === 'La radio');
-  const radioHref = radioItem ? normalizeMenuUrl(radioItem.url) : '/la-radio';
+  const show = usePlayerStore((s) => s.show);
 
   useEffect(() => {
     if (isOpen) {
@@ -69,15 +68,16 @@ export default function MobileNav({ items, logoSrc, logoAlt }: MobileNavProps) {
           )}
         </Link>
 
-        <Link
-          href={radioHref}
+        <button
+          type="button"
+          onClick={show}
           className="justify-self-end flex justify-between rounded-[30px] bg-secondary text-white font-button text-[16px] font-semibold px-[20px] py-[10px] inline-flex items-center gap-[8px] cursor-pointer"
         >
           La radio
           <svg xmlns="http://www.w3.org/2000/svg" width="11" height="14" viewBox="0 0 11 14" fill="none" aria-hidden="true">
             <path d="M10.5 6.92821L3.01142e-07 13.8564L9.06825e-07 3.83256e-06L10.5 6.92821Z" fill="white"/>
           </svg>
-        </Link>
+        </button>
       </div>
 
       {/* Drawer */}
@@ -131,6 +131,7 @@ export default function MobileNav({ items, logoSrc, logoAlt }: MobileNavProps) {
               </button>
               <button
                 type="button"
+                onClick={() => { show(); setIsOpen(false); }}
                 className="rounded-[30px] bg-secondary text-white font-button text-[16px] font-semibold h-[50px] px-[30px] py-[10px] cursor-pointer w-full"
               >
                 Écouter le direct
