@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { TopMenuItem } from '@/graphql/menus';
-import { normalizeMenuUrl } from '@/lib/wordpress';
+import { normalizeMenuUrl, isExternalUrl } from '@/lib/wordpress';
 import Image from 'next/image';
 
 interface TopMenuProps {
@@ -39,12 +39,14 @@ export default function TopMenu({ items, socialItems = [] }: TopMenuProps) {
         {socialItems.map((item, index) => {
           const icone = item.topMenuIcon ?? null;
           if (!icone?.sourceUrl) return null;
+          const external = isExternalUrl(item.url);
           return (
             <li key={item.id} className={index === 0 ? 'ml-8' : undefined}>
               <Link
                 href={normalizeMenuUrl(item.url)}
                 aria-label={item.label}
                 className="flex items-center"
+                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               >
                 <Image
                   src={icone.sourceUrl}

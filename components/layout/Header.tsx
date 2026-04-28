@@ -45,6 +45,7 @@ export default async function Header() {
       <div className="min-[1139px]:hidden">
         <MobileNav
           items={mainItems}
+          socialItems={socialItems}
           logoSrc={logo?.sourceUrl}
           logoAlt={logo?.altText ?? undefined}
         />

@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import type { MenuItem } from '@/graphql/menus';
-import { normalizeMenuUrl } from '@/lib/wordpress';
+import Image from 'next/image';
+import type { MenuItem, TopMenuItem } from '@/graphql/menus';
+import { normalizeMenuUrl, isExternalUrl } from '@/lib/wordpress';
 import { usePlayerStore } from '@/store/playerStore';
 
 interface MobileNavProps {
   items: MenuItem[];
+  socialItems?: TopMenuItem[];
   logoSrc?: string;
   logoAlt?: string;
 }
 
-export default function MobileNav({ items, logoSrc, logoAlt }: MobileNavProps) {
+export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const show = usePlayerStore((s) => s.show);
 
@@ -123,6 +125,32 @@ export default function MobileNav({ items, logoSrc, logoAlt }: MobileNavProps) {
             </ul>
 
             <div className="mt-auto pt-8 flex flex-col gap-4">
+              {socialItems.filter((item) => item.topMenuIcon?.sourceUrl).length > 0 && (
+                <div className="flex gap-4">
+                  {socialItems.map((item) => {
+                    const icone = item.topMenuIcon;
+                    if (!icone?.sourceUrl) return null;
+                    const external = isExternalUrl(item.url);
+                    return (
+                      <Link
+                        key={item.id}
+                        href={normalizeMenuUrl(item.url)}
+                        aria-label={item.label}
+                        onClick={() => setIsOpen(false)}
+                        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      >
+                        <Image
+                          src={icone.sourceUrl}
+                          alt={icone.altText || item.label}
+                          width={24}
+                          height={24}
+                          className="w-[24px] h-[24px] shrink-0"
+                        />
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
               <button
                 type="button"
                 className="rounded-[30px] bg-white text-primary font-button text-[16px] font-semibold h-[50px] px-[30px] py-[10px] cursor-pointer w-full"

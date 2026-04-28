@@ -1,22 +1,36 @@
 /**
- * Normalise une URL de menu item en path relatif.
- * Gère les URLs WordPress absolues et les paths relatifs saisis manuellement.
+ * Normalise une URL de menu item.
+ * - URLs internes WordPress (même domaine) → path relatif
+ * - URLs externes (réseaux sociaux, etc.) → URL complète conservée
  */
 export function normalizeMenuUrl(url: string): string {
   if (!url) return '/';
 
-  // Déjà un path relatif (liens personnalisés saisis dans WP)
   if (url.startsWith('/')) return url;
-
-  // Ancre seule
   if (url.startsWith('#')) return url;
 
   try {
     const parsed = new URL(url);
-    // Retourne path + query + hash, sans le domaine
+    const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL ?? '';
+    if (wpUrl) {
+      const wpHost = new URL(wpUrl).hostname;
+      if (parsed.hostname !== wpHost) return url;
+    }
     return parsed.pathname + parsed.search + parsed.hash;
   } catch {
     return url;
+  }
+}
+
+export function isExternalUrl(url: string): boolean {
+  if (!url || url.startsWith('/') || url.startsWith('#')) return false;
+  try {
+    const parsed = new URL(url);
+    const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL ?? '';
+    if (!wpUrl) return true;
+    return parsed.hostname !== new URL(wpUrl).hostname;
+  } catch {
+    return false;
   }
 }
 
