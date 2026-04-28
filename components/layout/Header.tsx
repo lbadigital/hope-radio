@@ -26,7 +26,7 @@ export default async function Header() {
   const [mainMenuData, topMenuData, logoData] = await Promise.all([
     fetchGraphQL<GetMainMenuData>(GET_MAIN_MENU).catch(() => null),
     fetchGraphQL<GetTopMenuData>(GET_TOP_MENU).catch(() => null),
-    fetchGraphQL<SiteLogoData>(GET_SITE_LOGO, undefined, { cache: 'no-store' }).catch(() => null),
+    fetchGraphQL<SiteLogoData>(GET_SITE_LOGO, undefined, { next: { revalidate: 3600 } }).catch(() => null),
   ]);
 
   const mainItems = mainMenuData?.menuItems.nodes ?? [];
