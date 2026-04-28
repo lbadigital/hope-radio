@@ -10,6 +10,7 @@ import {
 } from '@/graphql/menus';
 import NavMenu from './NavMenu';
 import TopMenu from './TopMenu';
+import MobileNav from './MobileNav';
 
 const GET_SITE_LOGO = /* GraphQL */ `
   query GetSiteLogo {
@@ -38,9 +39,19 @@ export default async function Header() {
   const socialItems = socialMenuData?.menuItems.nodes ?? [];
 
   return (
-    <header className="bg-brand-violet px-8 py-4 flex flex-col gap-[20px]">
-      
-      <div className="flex items-center gap-8">
+    <header className="bg-brand-violet px-4 md:px-8 py-4 flex flex-col gap-[20px]">
+
+      {/* Mobile / tablette portrait (< lg) */}
+      <div className="lg:hidden">
+        <MobileNav
+          items={mainItems}
+          logoSrc={logo?.sourceUrl}
+          logoAlt={logo?.altText ?? undefined}
+        />
+      </div>
+
+      {/* Desktop (>= lg) */}
+      <div className="hidden lg:flex items-center gap-8">
         <Link href="/" className="shrink-0">
           {logo?.sourceUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -57,11 +68,10 @@ export default async function Header() {
             </span>
           )}
         </Link>
-        <div className="flex flex-col flex-1 gap-6">
+        <div id="nav-menu-container" className="flex flex-col flex-1 gap-6">
           <TopMenu items={topItems} socialItems={socialItems} />
           <NavMenu items={mainItems} />
         </div>
-        
       </div>
     </header>
   );
