@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
-import Image from 'next/image';
 
 const STREAM_URL = 'https://stream.hoperadio.fr/hoperadio';
 const POLL_INTERVAL = 30_000;
@@ -27,24 +26,38 @@ export default function RadioPlayer() {
   const setMeta = usePlayerStore((s) => s.setMeta);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Create audio element once
+  // Create audio element once + écouter les événements de buffering
   useEffect(() => {
     const audio = new Audio(STREAM_URL);
     audio.preload = 'none';
     audioRef.current = audio;
+
+    const onWaiting = () => setIsLoading(true);
+    const onPlaying = () => setIsLoading(false);
+    const onError   = () => { setIsLoading(false); setPlaying(false); };
+
+    audio.addEventListener('waiting', onWaiting);
+    audio.addEventListener('playing', onPlaying);
+    audio.addEventListener('error',   onError);
+
     return () => {
+      audio.removeEventListener('waiting', onWaiting);
+      audio.removeEventListener('playing', onPlaying);
+      audio.removeEventListener('error',   onError);
       audio.pause();
       audio.src = '';
     };
-  }, []);
+  }, [setPlaying]);
 
   // Sync play/pause
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
     if (isPlaying) {
-      audio.play().catch(() => setPlaying(false));
+      setIsLoading(true);
+      audio.play().catch(() => { setIsLoading(false); setPlaying(false); });
     } else {
       audio.pause();
     }
@@ -85,12 +98,14 @@ export default function RadioPlayer() {
         {/* Play/Pause */}
         <button
           type="button"
-          aria-label={isPlaying ? 'Pause' : 'Play'}
+          aria-label={isLoading ? 'Chargement…' : isPlaying ? 'Pause' : 'Play'}
           onClick={togglePlay}
           className="shrink-0 flex items-center justify-center rounded-full bg-secondary cursor-pointer"
           style={{ width: '72px', height: '72px' }}
         >
-          {isPlaying ? (
+          {isLoading ? (
+            <div className="w-8 h-8 border-4 border-black/30 border-t-black rounded-full animate-spin" />
+          ) : isPlaying ? (
             <svg xmlns="http://www.w3.org/2000/svg" width="21" height="28" viewBox="0 0 21 28" fill="none">
               <path d="M8 28H0V0H8V28ZM21 28H13V0H21V28Z" fill="#0A0B0A"/>
             </svg>
@@ -104,16 +119,14 @@ export default function RadioPlayer() {
         {/* Cover */}
         {meta?.coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <div className="shrink-0 relative" style={{ width: '95px', height: '95px' }}>
-            <Image
-              src={meta.coverUrl}
-              alt={meta.title}
-              width={95}
-              height={95}
-              className="shrink-0 object-cover rounded-md"
-              style={{ width: '95px', height: '95px' }}
-            />
-          </div>
+          <img
+            src={meta.coverUrl}
+            alt={meta.title}
+            width={95}
+            height={95}
+            className="shrink-0 object-cover rounded-md"
+            style={{ width: '95px', height: '95px' }}
+          />
         ) : (
           <div className="shrink-0 bg-brand-violet" style={{ width: '95px', height: '95px' }} />
         )}
@@ -242,12 +255,14 @@ export default function RadioPlayer() {
         {/* Play/Pause */}
         <button
           type="button"
-          aria-label={isPlaying ? 'Pause' : 'Play'}
+          aria-label={isLoading ? 'Chargement…' : isPlaying ? 'Pause' : 'Play'}
           onClick={togglePlay}
           className="shrink-0 flex items-center justify-center rounded-full bg-secondary cursor-pointer"
           style={{ width: '56px', height: '56px' }}
         >
-          {isPlaying ? (
+          {isLoading ? (
+            <div className="w-7 h-7 border-4 border-black/30 border-t-black rounded-full animate-spin" />
+          ) : isPlaying ? (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="21" viewBox="0 0 21 28" fill="none">
               <path d="M8 28H0V0H8V28ZM21 28H13V0H21V28Z" fill="#0A0B0A"/>
             </svg>
