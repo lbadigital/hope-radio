@@ -8,7 +8,7 @@ interface NavMenuProps {
 
 export default function NavMenu({ items }: NavMenuProps) {
   return (
-    <nav className="flex flex-grow justify-end gap-8 items-center justify-between">
+    <nav id="menu-container" className="flex flex-grow justify-end gap-8 items-center justify-between">
       <ul className="flex gap-8">
         {items.map((item) => (
           <li key={item.id}>
@@ -43,6 +43,7 @@ export default function NavMenu({ items }: NavMenuProps) {
           Écouter le direct
         </button>
       </div>
+      
     </nav>
   );
 }

@@ -35,7 +35,7 @@ export default async function Header() {
 
   return (
     <header className="bg-brand-violet px-8 py-4 flex flex-col gap-[20px]">
-      <TopMenu items={topItems} />
+      
       <div className="flex items-center gap-8">
         <Link href="/" className="shrink-0">
           {logo?.sourceUrl ? (
@@ -53,7 +53,11 @@ export default async function Header() {
             </span>
           )}
         </Link>
-        <NavMenu items={mainItems} />
+        <div className="flex flex-col flex-1 gap-6">
+          <TopMenu items={topItems} />
+          <NavMenu items={mainItems} />
+        </div>
+        
       </div>
     </header>
   );
