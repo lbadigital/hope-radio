@@ -1,6 +1,6 @@
 .DS_Store
 .idea
-wordpress/plugins/advanced-custom-fields-pro
+wordpress/plugins/
 wordpress/themes/hope-radio/node_modules
 frontend/node_modules
 workers/radio-stream-proxy/node_modules
