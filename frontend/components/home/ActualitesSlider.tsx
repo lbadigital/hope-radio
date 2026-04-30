@@ -104,7 +104,7 @@ export default function ActualitesSlider({ cards }: ActualitesSliderProps) {
           },
         }}
         className="actualites-slider"
-        style={{ paddingBottom: '40px' }}
+        style={{ paddingBottom: '0' }}
       >
         {cards.map((card) => (
           <SwiperSlide key={card.uri}>
