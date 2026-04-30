@@ -83,7 +83,8 @@ body {
   font-family: var(--font-body);
 }
 
-/* ── HeroSlider — Swiper overrides ─────────────────────────────────────── */
+/* ── HeroSlider — Swiper overrides + responsive ─────────────────────────── */
+
 .hero-slider .swiper-pagination {
   bottom: 20px;
   left: 0;
