@@ -4,7 +4,7 @@
 //   - Shape standard WPGraphQL (nodes, featuredImage, uri, excerpt)
 //   - Champ ACF exposé via WPGraphQL for ACF : miseEnAvant { isMisEnAvant }
 //
-// ⚠ Ne pas modifier la structure de ce fichier sans mettre à jour
+// !! Ne pas modifier la structure de ce fichier sans mettre à jour
 //   la query GET_FEATURED_CONTENT dans graphql/hero.ts.
 
 import type { GetFeaturedContentData } from '@/graphql/hero';
