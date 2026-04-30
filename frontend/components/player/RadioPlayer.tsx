@@ -49,6 +49,7 @@ export default function RadioPlayer() {
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('error',   onError);
       audio.pause();
+      audio.src = ''; // libère immédiatement la connexion réseau au stream
     };
   }, [setPlaying]);
 

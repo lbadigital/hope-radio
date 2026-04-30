@@ -10,7 +10,8 @@ interface NavMenuProps {
 }
 
 export default function NavMenu({ items }: NavMenuProps) {
-  const show = usePlayerStore((s) => s.show);
+  const toggle = usePlayerStore((s) => s.toggle);
+  const isVisible = usePlayerStore((s) => s.isVisible);
 
   return (
     <nav id="menu-container" className="flex flex-grow justify-end gap-8 items-center justify-between">
@@ -43,10 +44,11 @@ export default function NavMenu({ items }: NavMenuProps) {
 
         <button
           type="button"
-          onClick={show}
+          onClick={toggle}
+          aria-pressed={isVisible}
           className="rounded-[30px] bg-secondary text-white font-button text-[clamp(12px,1.2vw,16px)] font-semibold w-[203px] min-[1139px]:w-fit xl:w-[203px] h-[50px] px-4 min-[1139px]:px-[30px] py-[10px] cursor-pointer"
         >
-          Écouter le direct
+          {isVisible ? 'Fermer le lecteur' : 'Écouter le direct'}
         </button>
       </div>
       

@@ -16,7 +16,8 @@ interface MobileNavProps {
 
 export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const show = usePlayerStore((s) => s.show);
+  const toggle = usePlayerStore((s) => s.toggle);
+  const isVisible = usePlayerStore((s) => s.isVisible);
 
   useEffect(() => {
     if (isOpen) {
@@ -72,13 +73,16 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
 
         <button
           type="button"
-          onClick={show}
+          onClick={toggle}
+          aria-pressed={isVisible}
           className="justify-self-end flex justify-between rounded-[30px] bg-secondary text-white font-button text-[16px] font-semibold px-[20px] py-[10px] inline-flex items-center gap-[8px] cursor-pointer"
         >
-          La radio
-          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="14" viewBox="0 0 11 14" fill="none" aria-hidden="true">
-            <path d="M10.5 6.92821L3.01142e-07 13.8564L9.06825e-07 3.83256e-06L10.5 6.92821Z" fill="white"/>
-          </svg>
+          {isVisible ? 'Fermer' : 'La radio'}
+          {!isVisible && (
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="14" viewBox="0 0 11 14" fill="none" aria-hidden="true">
+              <path d="M10.5 6.92821L3.01142e-07 13.8564L9.06825e-07 3.83256e-06L10.5 6.92821Z" fill="white"/>
+            </svg>
+          )}
         </button>
       </div>
 
@@ -159,10 +163,11 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
               </button>
               <button
                 type="button"
-                onClick={() => { show(); setIsOpen(false); }}
+                onClick={() => { toggle(); setIsOpen(false); }}
+                aria-pressed={isVisible}
                 className="rounded-[30px] bg-secondary text-white font-button text-[16px] font-semibold h-[50px] px-[30px] py-[10px] cursor-pointer w-full"
               >
-                Écouter le direct
+                {isVisible ? 'Fermer le lecteur' : 'Écouter le direct'}
               </button>
             </div>
           </nav>
