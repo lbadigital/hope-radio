@@ -56,7 +56,7 @@ export default function HeroSlider() {
             <div className="max-w-[1139px] mx-auto h-full flex items-stretch px-8 max-[980px]:flex-col max-[980px]:px-0 max-[980px]:max-w-none">
 
               {/* ── Colonne texte (gauche desktop / bas mobile) ── */}
-              <div className="flex flex-col justify-center gap-6 flex-1 min-w-0 pr-8 py-12 max-[980px]:order-2 max-[980px]:px-5 max-[980px]:py-8 max-[980px]:bg-[#720049]">
+              <div className="flex flex-col justify-start gap-6 flex-1 min-w-0 pr-8 pb-12 max-[980px]:order-2 max-[980px]:px-5 max-[980px]:py-8 max-[980px]:bg-[#720049]">
                 {/*
                   Tag — desktop uniquement.
                   Sur mobile il est repositionné sur l'image (voir ci-dessous).
