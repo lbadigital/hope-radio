@@ -4,7 +4,7 @@ import type { SiteLogoData } from '@/graphql/layout';
 
 export const MOCK_SITE_LOGO: SiteLogoData = {
   customLogo: {
-    sourceUrl: null,
+    sourceUrl: "",
     altText:   'Hope Radio',
   },
 };
