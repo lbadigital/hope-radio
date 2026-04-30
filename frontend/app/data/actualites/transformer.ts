@@ -36,6 +36,6 @@ export function transformActualites(data: GetActualitesData): ActualiteCard[] {
       url: node.featuredImage?.node.sourceUrl ?? FALLBACK_IMAGE,
       alt: node.featuredImage?.node.altText   ?? node.title,
     },
-    uri: node.uri,
+    uri: `/actualite/${node.slug}`,
   }));
 }
