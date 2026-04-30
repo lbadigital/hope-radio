@@ -14,3 +14,8 @@ export { MOCK_SITE_LOGO } from './layout/mock-site-logo';
 export { MOCK_FEATURED_CONTENT }              from './hero/mock-featured-content';
 export { transformFeaturedContent }           from './hero/transformer';
 export type { FeaturedSlide, PostType }       from './hero/transformer';
+
+// Actualités
+export { MOCK_ACTUALITES }                    from './actualites/mock-actualites';
+export { transformActualites }                from './actualites/transformer';
+export type { ActualiteCard }                 from './actualites/transformer';
