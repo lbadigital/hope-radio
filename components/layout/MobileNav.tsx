@@ -39,15 +39,21 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
 
   return (
     <>
-      {/* Barre mobile */}
-      <div className="grid grid-cols-3 items-center">
+      {/* Barre mobile — grille 12 colonnes
+          Burger : col-span-2 (≈ 48px)
+          Logo   : col-span-6 (espace restant, centré)
+          Bouton : col-span-4 (≈ 120px)
+      */}
+      <div id="mobile-navbar" className="grid grid-cols-12 items-center">
+
+        {/* Burger — col-span-2 */}
         <button
           type="button"
           aria-label="Ouvrir le menu"
           aria-expanded={isOpen}
           aria-controls="mobile-menu-drawer"
           onClick={() => setIsOpen(true)}
-          className="cursor-pointer shrink-0"
+          className="col-span-2 justify-self-start cursor-pointer"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="31" height="20" viewBox="0 0 31 20" fill="none" aria-hidden="true">
             <line y1="1" x2="31" y2="1" stroke="white" strokeWidth="2"/>
@@ -56,7 +62,8 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
           </svg>
         </button>
 
-        <Link href="/" className="flex justify-center">
+        {/* Logo — col-span-6, centré */}
+        <Link href="/" className="col-span-6 flex justify-center">
           {logoSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -71,11 +78,12 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
           )}
         </Link>
 
+        {/* Bouton La radio — col-span-4, aligné à droite */}
         <button
           type="button"
           onClick={toggle}
           aria-pressed={isVisible}
-          className="justify-self-end flex justify-between rounded-[30px] bg-secondary text-white font-button text-[16px] font-semibold px-[20px] py-[10px] inline-flex items-center gap-[8px] cursor-pointer"
+          className="col-span-4 justify-self-end flex items-center gap-[8px] rounded-[30px] bg-secondary text-white font-button text-[14px] font-semibold px-[14px] py-[10px] cursor-pointer"
         >
           {isVisible ? 'Fermer' : 'La radio'}
           {!isVisible && (
@@ -84,6 +92,7 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
             </svg>
           )}
         </button>
+
       </div>
 
       {/* Drawer */}

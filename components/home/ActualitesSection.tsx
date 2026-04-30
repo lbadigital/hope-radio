@@ -149,22 +149,25 @@ export default async function ActualitesSection({
 
         /* Pagination — même style pill que HeroSlider, couleur primaire */
         .actualites-slider .swiper-pagination {
+          position:        relative;
+          bottom:          auto;
           display:         flex;
           align-items:     center;
           justify-content: center;
           gap:             6px;
+          margin-top:      20px;
         }
         .actualites-slider .swiper-pagination-bullet {
-          width:        8px;
-          height:       8px;
-          background:   rgba(114, 0, 74, 0.4);
-          opacity:      1;
+          width:         8px;
+          height:        8px;
+          background:    rgba(114, 0, 74, 0.4);
+          opacity:       1;
           border-radius: 100px;
-          transition:   width 0.3s ease, background 0.3s ease;
+          transition:    width 0.3s ease, background 0.3s ease;
         }
         .actualites-slider .swiper-pagination-bullet-active {
-          width:        24px;
-          background:   #72004A;
+          width:         24px;
+          background:    #72004A;
           border-radius: 100px;
         }
 
