@@ -28,12 +28,13 @@ function ActualiteCardItem({ card }: { card: ActualiteCard }) {
         cursor:         'pointer',
       }}
     >
-      {/* Thumbnail — dimensions fixes spécifiées */}
+      {/* Thumbnail */}
       <div
         style={{
-          width:       '100%',
-          aspectRatio: '186/95',
-          overflow:    'hidden',
+          width:        '100%',
+          aspectRatio:  '186/95',
+          overflow:     'hidden',
+          borderRadius: '1rem',
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

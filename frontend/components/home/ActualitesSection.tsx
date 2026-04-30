@@ -36,11 +36,12 @@ function ActualiteCardDesktop({
       {/* Thumbnail */}
       <div
         style={{
-          width:       isSingle ? '372px' : '100%',
-          height:      isSingle ? '190px' : 'auto',
-          aspectRatio: '186/95',
-          overflow:    'hidden',
-          flexShrink:  0,
+          width:        isSingle ? '372px' : '100%',
+          height:       isSingle ? '190px' : 'auto',
+          aspectRatio:  '186/95',
+          overflow:     'hidden',
+          flexShrink:   0,
+          borderRadius: '1rem',
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -147,18 +148,25 @@ export default async function ActualitesSection({
           transform: scale(1) !important;
         }
 
-        /* Pagination dots — même style que HeroSlider */
+        /* Pagination — même style pill que HeroSlider, couleur primaire */
+        .actualites-slider .swiper-pagination {
+          display:         flex;
+          align-items:     center;
+          justify-content: center;
+          gap:             6px;
+        }
         .actualites-slider .swiper-pagination-bullet {
-          background:    #72004A;
-          opacity:       0.3;
-          width:         8px;
-          height:        8px;
-          border-radius: 50%;
-          transition:    opacity 0.2s, transform 0.2s;
+          width:        8px;
+          height:       8px;
+          background:   rgba(114, 0, 74, 0.4);
+          opacity:      1;
+          border-radius: 100px;
+          transition:   width 0.3s ease, background 0.3s ease;
         }
         .actualites-slider .swiper-pagination-bullet-active {
-          opacity:   1;
-          transform: scale(1.3);
+          width:        24px;
+          background:   #72004A;
+          border-radius: 100px;
         }
 
         /* Desktop : grille visible, slider caché, lien dans le header */
