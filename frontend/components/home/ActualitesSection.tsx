@@ -17,7 +17,7 @@ function ActualiteCardDesktop({
   isSingle: boolean;
 }) {
   return (
-    <a
+    <Link
       href={card.uri}
       className="actualite-card"
       style={{
@@ -30,7 +30,6 @@ function ActualiteCardDesktop({
         gap:            '8px',
         textDecoration: 'none',
         color:          'inherit',
-        cursor:         'pointer',
       }}
     >
       {/* Thumbnail */}
@@ -90,7 +89,7 @@ function ActualiteCardDesktop({
       >
         {card.excerpt || card.title}
       </p>
-    </a>
+    </Link>
   );
 }
 
