@@ -73,7 +73,7 @@ add_action('init', function () {
         'public'              => true,
         'has_archive'         => true,
         'rewrite'             => ['slug' => 'agenda'],
-        'supports'            => ['title', 'editor'],
+        'supports'            => ['title', 'editor', 'thumbnail'],
         'menu_icon'           => 'dashicons-calendar-alt',
         'show_in_rest'        => true,
         'show_in_graphql'     => true,

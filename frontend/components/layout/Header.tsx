@@ -8,22 +8,10 @@ import {
   type GetTopMenuData,
   type GetSocialMenuData,
 } from '@/graphql/menus';
+import { GET_SITE_LOGO, type SiteLogoData } from '@/graphql/layout';
 import NavMenu from './NavMenu';
 import TopMenu from './TopMenu';
 import MobileNav from './MobileNav';
-
-const GET_SITE_LOGO = /* GraphQL */ `
-  query GetSiteLogo {
-    customLogo {
-      sourceUrl
-      altText
-    }
-  }
-`;
-
-interface SiteLogoData {
-  customLogo: { sourceUrl: string; altText: string } | null;
-}
 
 export default async function Header() {
   const [mainMenuData, topMenuData, logoData, socialMenuData] = await Promise.all([
@@ -33,9 +21,9 @@ export default async function Header() {
     fetchGraphQL<GetSocialMenuData>(GET_SOCIAL_MENU).catch(() => null),
   ]);
 
-  const mainItems = mainMenuData?.menuItems.nodes ?? [];
-  const topItems = topMenuData?.menuItems.nodes ?? [];
-  const logo = logoData?.customLogo ?? null;
+  const mainItems   = mainMenuData?.menuItems.nodes   ?? [];
+  const topItems    = topMenuData?.menuItems.nodes    ?? [];
+  const logo        = logoData?.customLogo            ?? null;
   const socialItems = socialMenuData?.menuItems.nodes ?? [];
 
   return (

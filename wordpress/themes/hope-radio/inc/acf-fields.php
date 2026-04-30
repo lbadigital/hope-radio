@@ -195,6 +195,38 @@ acf_add_local_field_group([
     ],
 ]);
 
+// ── Mise en avant (hero slider) ──────────────────────────────────────────────
+//
+// Ce field group est exposé via WPGraphQL for ACF.
+// Accès GraphQL : node { miseEnAvant { isMisEnAvant } }
+// Utilisé pour filtrer les contenus affichés dans le HeroSlider.
+
+acf_add_local_field_group([
+    'key'                => 'group_mise_en_avant',
+    'title'              => 'Mise en avant',
+    'show_in_graphql'    => 1,
+    'graphql_field_name' => 'miseEnAvant',
+    'fields'             => [
+        [
+            'key'          => 'field_mise_en_avant',
+            'label'        => 'Mettre en avant',
+            'name'         => 'is_mis_en_avant',
+            'type'         => 'true_false',
+            'ui'           => 1,
+            'ui_on_text'   => 'Oui',
+            'ui_off_text'  => 'Non',
+            'default_value' => 0,
+            'show_in_graphql' => 1,
+        ],
+    ],
+    'location' => [
+        [['param' => 'post_type', 'operator' => '==', 'value' => 'emission']],
+        [['param' => 'post_type', 'operator' => '==', 'value' => 'podcast']],
+        [['param' => 'post_type', 'operator' => '==', 'value' => 'post']],
+        [['param' => 'post_type', 'operator' => '==', 'value' => 'agenda']],
+    ],
+]);
+
 // WPGraphQL for ACF ne sait pas résoudre les champs sur MenuItem.
 // On enregistre les champs directement via l'API WPGraphQL avec un resolver explicite.
 add_action('graphql_register_types', function () {
