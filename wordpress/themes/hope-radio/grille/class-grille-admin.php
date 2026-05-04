@@ -122,6 +122,39 @@ class Grille_Admin {
                 <div id="grille-modal-error" class="notice notice-error" style="display:none;"></div>
             </div>
         </div>
+
+        <div id="grille-modal-dup" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="grille-dup-title">
+            <div id="grille-modal-dup-overlay"></div>
+            <div id="grille-modal-dup-box">
+                <h2 id="grille-dup-title">Dupliquer <span id="grille-dup-source-label"></span></h2>
+                <p style="margin:0 0 12px;">Copier tous les créneaux vers :</p>
+
+                <div id="grille-dup-days" class="grille-days-grid">
+                    <!-- Checkboxes générées dynamiquement en JS -->
+                </div>
+
+                <div class="grille-field" style="margin-top:14px;">
+                    <label style="font-weight:normal;cursor:pointer;">
+                        <input type="checkbox" id="grille-dup-all" style="width:auto;margin-right:6px;" />
+                        Toute la semaine
+                    </label>
+                </div>
+
+                <div class="grille-field">
+                    <label style="font-weight:normal;cursor:pointer;">
+                        <input type="checkbox" id="grille-dup-replace" style="width:auto;margin-right:6px;" />
+                        Remplacer les créneaux existants du jour cible
+                    </label>
+                </div>
+
+                <div class="grille-modal-actions">
+                    <button type="button" id="grille-btn-dup-confirm" class="button button-primary">Dupliquer</button>
+                    <button type="button" id="grille-btn-dup-cancel"  class="button">Annuler</button>
+                </div>
+
+                <div id="grille-dup-error" class="notice notice-error" style="display:none;"></div>
+            </div>
+        </div>
         <?php
     }
 

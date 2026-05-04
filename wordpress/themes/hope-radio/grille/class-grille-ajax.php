@@ -3,9 +3,10 @@
 class Grille_Ajax {
 
     public function init(): void {
-        add_action('wp_ajax_grille_save_slot',   [$this, 'save_slot']);
-        add_action('wp_ajax_grille_update_slot', [$this, 'update_slot']);
-        add_action('wp_ajax_grille_delete_slot', [$this, 'delete_slot']);
+        add_action('wp_ajax_grille_save_slot',      [$this, 'save_slot']);
+        add_action('wp_ajax_grille_update_slot',    [$this, 'update_slot']);
+        add_action('wp_ajax_grille_delete_slot',    [$this, 'delete_slot']);
+        add_action('wp_ajax_grille_duplicate_day',  [$this, 'duplicate_day']);
     }
 
     private function check_access(): void {
@@ -122,5 +123,100 @@ class Grille_Ajax {
         wp_delete_post($post_id, true);
 
         wp_send_json_success();
+    }
+
+    public function duplicate_day(): void {
+        $this->check_access();
+
+        $source_weekday  = (int) ($_POST['sourceWeekday'] ?? -1);
+        $target_weekdays = array_map('intval', (array) ($_POST['targetWeekdays'] ?? []));
+        $replace         = ($_POST['replaceExisting'] ?? '0') === '1';
+
+        if ($source_weekday < 0 || $source_weekday > 6) {
+            wp_send_json_error('Jour source invalide.');
+        }
+
+        $target_weekdays = array_values(array_unique(array_filter(
+            $target_weekdays,
+            function ($d) use ($source_weekday) { return $d >= 0 && $d <= 6 && $d !== $source_weekday; }
+        )));
+
+        if (empty($target_weekdays)) {
+            wp_send_json_error('Aucun jour cible valide sélectionné.');
+        }
+
+        $source_slots = get_posts([
+            'post_type'      => 'grille_slot',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'meta_query'     => [[
+                'key'     => 'weekday',
+                'value'   => $source_weekday,
+                'compare' => '=',
+                'type'    => 'NUMERIC',
+            ]],
+        ]);
+
+        if (empty($source_slots)) {
+            wp_send_json_error('Aucun créneau à copier sur ce jour.');
+        }
+
+        $deleted_ids = [];
+        $created     = [];
+
+        foreach ($target_weekdays as $target_day) {
+            if ($replace) {
+                $existing = get_posts([
+                    'post_type'      => 'grille_slot',
+                    'post_status'    => 'publish',
+                    'posts_per_page' => -1,
+                    'fields'         => 'ids',
+                    'meta_query'     => [[
+                        'key'     => 'weekday',
+                        'value'   => $target_day,
+                        'compare' => '=',
+                        'type'    => 'NUMERIC',
+                    ]],
+                ]);
+                foreach ($existing as $id) {
+                    wp_delete_post($id, true);
+                    $deleted_ids[] = $id;
+                }
+            }
+
+            foreach ($source_slots as $slot) {
+                $emission_id = (int) get_post_meta($slot->ID, 'emission_id', true);
+                $heure_debut = get_post_meta($slot->ID, 'heure_debut', true);
+                $heure_fin   = get_post_meta($slot->ID, 'heure_fin', true);
+
+                $new_id = wp_insert_post([
+                    'post_type'   => 'grille_slot',
+                    'post_status' => 'publish',
+                    'post_title'  => $slot->post_title,
+                ]);
+
+                if (is_wp_error($new_id)) {
+                    continue;
+                }
+
+                update_post_meta($new_id, 'weekday',     $target_day);
+                update_post_meta($new_id, 'heure_debut', $heure_debut);
+                update_post_meta($new_id, 'heure_fin',   $heure_fin);
+                update_post_meta($new_id, 'emission_id', $emission_id);
+
+                $created[] = [
+                    'postId'     => $new_id,
+                    'weekday'    => $target_day,
+                    'heureDebut' => $heure_debut,
+                    'heureFin'   => $heure_fin,
+                    'emissionId' => $emission_id,
+                ];
+            }
+        }
+
+        wp_send_json_success([
+            'deletedPostIds' => $deleted_ids,
+            'created'        => $created,
+        ]);
     }
 }

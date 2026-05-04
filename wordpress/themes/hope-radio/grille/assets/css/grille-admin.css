@@ -100,3 +100,64 @@
     width: auto;
     margin: 0;
 }
+
+/* Modal duplication — structure partagée avec le modal principal */
+#grille-modal-dup {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+}
+
+#grille-modal-dup-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+#grille-modal-dup-box {
+    position: relative;
+    background: #fff;
+    border-radius: 6px;
+    padding: 28px 32px;
+    width: 420px;
+    max-width: 95vw;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    z-index: 1;
+}
+
+#grille-dup-title {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#grille-dup-error {
+    margin-top: 12px;
+    padding: 8px 12px;
+}
+
+/* Bouton duplication dans l'en-tête de colonne FullCalendar */
+.fc-col-header-cell {
+    position: relative;
+}
+
+.grille-dup-header-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 17px;
+    color: #3c3c3c;
+    padding: 2px 4px;
+    line-height: 1;
+}
+
+.grille-dup-header-btn:hover {
+    color: #000;
+}
