@@ -6,6 +6,71 @@ class Grille_Emission_Meta {
 
     public function init(): void {
         add_action('add_meta_boxes', [$this, 'register_meta_box']);
+        add_filter('manage_emission_posts_columns', [$this, 'add_column']);
+        add_filter('manage_emission_posts_columns', [$this, 'order_columns'], 99);
+        add_action('manage_emission_posts_custom_column', [$this, 'render_column'], 10, 2);
+    }
+
+    public function add_column(array $columns): array {
+        $columns['grille_creneaux'] = 'Créneaux';
+        return $columns;
+    }
+
+    public function order_columns(array $columns): array {
+        $order = ['cb', 'title', 'grille_creneaux', 'mis_en_avant', 'date'];
+        $result = [];
+        foreach ($order as $key) {
+            if (isset($columns[$key])) {
+                $result[$key] = $columns[$key];
+            }
+        }
+        foreach ($columns as $key => $label) {
+            if (!isset($result[$key])) {
+                $result[$key] = $label;
+            }
+        }
+        return $result;
+    }
+
+    public function render_column(string $column, int $post_id): void {
+        if ($column !== 'grille_creneaux') {
+            return;
+        }
+
+        $slots = get_posts([
+            'post_type'      => 'grille_slot',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'meta_value_num',
+            'meta_key'       => 'weekday',
+            'order'          => 'ASC',
+            'meta_query'     => [[
+                'key'     => 'emission_id',
+                'value'   => $post_id,
+                'compare' => '=',
+                'type'    => 'NUMERIC',
+            ]],
+        ]);
+
+        if (empty($slots)) {
+            echo '<span style="color:#999;">—</span>';
+            return;
+        }
+
+        $lines = [];
+        foreach ($slots as $slot) {
+            $weekday     = (int) get_post_meta($slot->ID, 'weekday', true);
+            $heure_debut = get_post_meta($slot->ID, 'heure_debut', true);
+            $heure_fin   = get_post_meta($slot->ID, 'heure_fin', true);
+            $jour        = self::JOURS[$weekday] ?? '—';
+            $lines[]     = sprintf(
+                '<span style="white-space:nowrap;">%s %s–%s</span>',
+                esc_html(substr($jour, 0, 3)),
+                esc_html($heure_debut),
+                esc_html($heure_fin)
+            );
+        }
+        echo implode('<br>', $lines);
     }
 
     public function register_meta_box(): void {
