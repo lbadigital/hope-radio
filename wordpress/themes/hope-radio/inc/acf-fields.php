@@ -9,13 +9,6 @@ acf_add_local_field_group([
     'title'    => "Informations de l'émission",
     'fields'   => [
         [
-            'key'          => 'field_emission_horaire',
-            'label'        => 'Horaire',
-            'name'         => 'horaire',
-            'type'         => 'text',
-            'instructions' => 'Ex : Lundi – Vendredi, 7h – 9h',
-        ],
-        [
             'key'   => 'field_emission_theme',
             'label' => 'Thème',
             'name'  => 'theme',
