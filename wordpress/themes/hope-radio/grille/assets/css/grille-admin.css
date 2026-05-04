@@ -67,3 +67,36 @@
     margin-top: 12px;
     padding: 8px 12px;
 }
+
+/* Sélection multi-jours (mode création) */
+.grille-days-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.grille-days-grid label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-weight: normal;
+    background: #f0f0f1;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+}
+
+.grille-days-grid label:has(input:checked) {
+    background: #2271b1;
+    color: #fff;
+    border-color: #2271b1;
+}
+
+.grille-days-grid input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}

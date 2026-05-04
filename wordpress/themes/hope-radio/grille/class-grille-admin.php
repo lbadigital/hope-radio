@@ -91,16 +91,16 @@ class Grille_Admin {
                 </div>
 
                 <div class="grille-field">
-                    <label for="grille-weekday">Jour</label>
-                    <select id="grille-weekday">
-                        <option value="0">Dimanche</option>
-                        <option value="1">Lundi</option>
-                        <option value="2">Mardi</option>
-                        <option value="3">Mercredi</option>
-                        <option value="4">Jeudi</option>
-                        <option value="5">Vendredi</option>
-                        <option value="6">Samedi</option>
-                    </select>
+                    <label>Jours</label>
+                    <div class="grille-days-grid">
+                        <label><input type="checkbox" name="grille-weekday-cb" value="1"><span>Lundi</span></label>
+                        <label><input type="checkbox" name="grille-weekday-cb" value="2"><span>Mardi</span></label>
+                        <label><input type="checkbox" name="grille-weekday-cb" value="3"><span>Mercredi</span></label>
+                        <label><input type="checkbox" name="grille-weekday-cb" value="4"><span>Jeudi</span></label>
+                        <label><input type="checkbox" name="grille-weekday-cb" value="5"><span>Vendredi</span></label>
+                        <label><input type="checkbox" name="grille-weekday-cb" value="6"><span>Samedi</span></label>
+                        <label><input type="checkbox" name="grille-weekday-cb" value="0"><span>Dimanche</span></label>
+                    </div>
                 </div>
 
                 <div class="grille-field">

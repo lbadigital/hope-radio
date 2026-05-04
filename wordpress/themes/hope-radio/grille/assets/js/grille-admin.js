@@ -39,8 +39,12 @@ document.addEventListener('DOMContentLoaded', function () {
         selectable:        true,
         editable:          true,
         eventOverlap:      false,
-        headerToolbar:     false,
-        events:            initialEvents,
+        headerToolbar: {
+            left:   'prev,next today',
+            center: 'title',
+            right:  '',
+        },
+        events: initialEvents,
 
         select: function (info) {
             openModal('create', {
@@ -97,21 +101,50 @@ document.addEventListener('DOMContentLoaded', function () {
         return date.toTimeString().slice(0, 5);
     }
 
+    function addEventToCalendar(saved) {
+        var emission = GrilleData.emissions.find(function (e) {
+            return e.id == saved.emissionId;
+        });
+        calendar.addEvent({
+            id:          'slot-' + saved.postId,
+            title:       emission ? emission.title : 'Émission',
+            daysOfWeek:  [parseInt(saved.weekday, 10)],
+            startTime:   saved.heureDebut + ':00',
+            endTime:     saved.heureFin   + ':00',
+            color:       emission ? emission.color : '#999999',
+            extendedProps: {
+                emissionId: saved.emissionId,
+                postId:     saved.postId,
+            },
+        });
+    }
+
     // ── Modal ─────────────────────────────────────────────────────────────────
 
-    var modal     = document.getElementById('grille-modal');
-    var overlay   = document.getElementById('grille-modal-overlay');
-    var errorBox  = document.getElementById('grille-modal-error');
-    var btnDelete = document.getElementById('grille-btn-delete');
+    var modal       = document.getElementById('grille-modal');
+    var overlay     = document.getElementById('grille-modal-overlay');
+    var errorBox    = document.getElementById('grille-modal-error');
+    var btnDelete   = document.getElementById('grille-btn-delete');
+    var modalTitle  = document.getElementById('grille-modal-title');
+    var currentMode = 'create';
+    var originalDay = null; // jour du slot en cours d'édition
 
     function openModal(mode, data) {
-        document.getElementById('grille-slot-id').value      = data.id        || '';
-        document.getElementById('grille-slot-post-id').value = data.postId    || '';
+        currentMode = mode;
+        originalDay = data.weekday !== undefined ? parseInt(data.weekday, 10) : null;
+
+        document.getElementById('grille-slot-id').value      = data.id         || '';
+        document.getElementById('grille-slot-post-id').value = data.postId     || '';
         document.getElementById('grille-emission-id').value  = data.emissionId || '';
-        document.getElementById('grille-weekday').value      = data.weekday !== undefined ? data.weekday : '';
         document.getElementById('grille-heure-debut').value  = data.heureDebut || '';
         document.getElementById('grille-heure-fin').value    = data.heureFin   || '';
 
+        // Pré-cocher uniquement le jour concerné (création = jour dessiné, édition = jour actuel)
+        document.querySelectorAll('input[name="grille-weekday-cb"]').forEach(function (cb) {
+            cb.checked = (parseInt(cb.value, 10) === originalDay);
+        });
+
+        modalTitle.textContent  = (mode === 'create') ? 'Nouveau créneau' : 'Modifier le créneau';
         btnDelete.style.display = (mode === 'edit') ? 'inline-block' : 'none';
         errorBox.style.display  = 'none';
         modal.style.display     = 'flex';
@@ -133,46 +166,73 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('grille-btn-save').addEventListener('click', function () {
         var emissionId = document.getElementById('grille-emission-id').value;
-        var weekday    = document.getElementById('grille-weekday').value;
         var heureDebut = document.getElementById('grille-heure-debut').value;
         var heureFin   = document.getElementById('grille-heure-fin').value;
-        var slotId     = document.getElementById('grille-slot-id').value;
-        var postId     = document.getElementById('grille-slot-post-id').value;
 
         if (!emissionId || !heureDebut || !heureFin) {
             showError('Veuillez remplir tous les champs obligatoires.');
             return;
         }
 
-        ajaxSaveSlot(
-            { emissionId: emissionId, weekday: weekday, heureDebut: heureDebut, heureFin: heureFin, slotId: slotId, postId: postId },
-            function (saved) {
-                var emission = GrilleData.emissions.find(function (e) {
-                    return e.id == saved.emissionId;
-                });
+        var checkedDays = Array.from(document.querySelectorAll('input[name="grille-weekday-cb"]:checked'))
+                              .map(function (cb) { return cb.value; });
 
-                if (slotId) {
-                    var existing = calendar.getEventById(slotId);
-                    if (existing) existing.remove();
-                }
+        if (checkedDays.length === 0) {
+            showError('Veuillez sélectionner au moins un jour.');
+            return;
+        }
 
-                calendar.addEvent({
-                    id:          'slot-' + saved.postId,
-                    title:       emission ? emission.title : 'Émission',
-                    daysOfWeek:  [parseInt(saved.weekday, 10)],
-                    startTime:   saved.heureDebut + ':00',
-                    endTime:     saved.heureFin   + ':00',
-                    color:       emission ? emission.color : '#999999',
-                    extendedProps: {
-                        emissionId: saved.emissionId,
-                        postId:     saved.postId,
+        if (currentMode === 'edit') {
+            var slotId = document.getElementById('grille-slot-id').value;
+            var postId = document.getElementById('grille-slot-post-id').value;
+
+            // Si le jour original est encore coché, on garde le slot en place (même postId).
+            // Sinon on déplace le slot sur le premier jour coché.
+            var origStr   = originalDay !== null ? String(originalDay) : null;
+            var updateDay = (origStr && checkedDays.indexOf(origStr) !== -1) ? origStr : checkedDays[0];
+            var extraDays = checkedDays.filter(function (d) { return d !== updateDay; });
+
+            ajaxSaveSlot(
+                { emissionId: emissionId, weekday: updateDay, heureDebut: heureDebut, heureFin: heureFin, slotId: slotId, postId: postId },
+                function (saved) {
+                    if (slotId) {
+                        var ex = calendar.getEventById(slotId);
+                        if (ex) ex.remove();
+                    }
+                    addEventToCalendar(saved);
+
+                    // Créer un nouveau slot pour chaque jour supplémentaire coché
+                    extraDays.forEach(function (day) {
+                        ajaxSaveSlot(
+                            { emissionId: emissionId, weekday: day, heureDebut: heureDebut, heureFin: heureFin, slotId: '', postId: '' },
+                            addEventToCalendar,
+                            showError
+                        );
+                    });
+
+                    closeModal();
+                },
+                showError
+            );
+        } else {
+            // Mode création : un appel AJAX par jour coché
+            var pending    = checkedDays.length;
+            var firstError = null;
+
+            checkedDays.forEach(function (day) {
+                ajaxSaveSlot(
+                    { emissionId: emissionId, weekday: day, heureDebut: heureDebut, heureFin: heureFin, slotId: '', postId: '' },
+                    function (saved) {
+                        addEventToCalendar(saved);
+                        if (--pending === 0 && !firstError) closeModal();
                     },
-                });
-
-                closeModal();
-            },
-            showError
-        );
+                    function (err) {
+                        if (!firstError) { firstError = err; showError(err); }
+                        --pending;
+                    }
+                );
+            });
+        }
     });
 
     // ── Bouton Supprimer ──────────────────────────────────────────────────────
@@ -186,8 +246,8 @@ document.addEventListener('DOMContentLoaded', function () {
         ajaxDeleteSlot(
             postId,
             function () {
-                var existing = calendar.getEventById(slotId);
-                if (existing) existing.remove();
+                var ex = calendar.getEventById(slotId);
+                if (ex) ex.remove();
                 closeModal();
             },
             showError
