@@ -37,17 +37,21 @@ function EmissionCard({ slot }: { slot: EmissionSlot }) {
           flexShrink:    0,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={slot.image.url}
-          alt={slot.image.alt}
-          style={{
-            width:      '100%',
-            height:     '100%',
-            objectFit:  'cover',
-            display:    'block',
-          }}
-        />
+        {slot.image.url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={slot.image.url}
+            alt={slot.image.alt}
+            style={{
+              width:      '100%',
+              height:     '100%',
+              objectFit:  'cover',
+              display:    'block',
+            }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: '#4a0030' }} />
+        )}
 
         {/* Dégradé sombre bas → haut pour lisibilité du texte */}
         <div

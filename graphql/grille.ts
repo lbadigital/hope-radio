@@ -1,8 +1,6 @@
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface GrilleSlotRaw {
-  id:         string;
-  date:       string;
   heureDebut: string;
   heureFin:   string;
   emission:   {
@@ -22,8 +20,6 @@ export interface GetGrilleSlotsData {
 export const GET_GRILLE_SLOTS = `
   query GetGrilleSlots($dateDebut: String!, $dateFin: String!) {
     grilleSlots(dateDebut: $dateDebut, dateFin: $dateFin) {
-      id
-      date
       heureDebut
       heureFin
       emission {
