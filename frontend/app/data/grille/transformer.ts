@@ -1,7 +1,7 @@
 import type { GetGrilleSlotsData } from '@/graphql/grille';
 
 export interface EmissionSlot {
-  id:         string;
+  id:         string; // clé synthétique : heureDebut + heureFin
   heureDebut: string;
   heureFin:   string;
   title:      string;
@@ -16,7 +16,7 @@ export function transformGrilleSlots(data: GetGrilleSlotsData): EmissionSlot[] {
     .map((slot) => {
       const emission = slot.emission!;
       return {
-        id:         slot.id,
+        id:         `${slot.heureDebut}-${slot.heureFin}`,
         heureDebut: slot.heureDebut,
         heureFin:   slot.heureFin,
         title:      emission.title,

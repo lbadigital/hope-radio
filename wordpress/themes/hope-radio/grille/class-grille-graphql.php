@@ -8,7 +8,7 @@ class Grille_GraphQL {
 
     public function register_fields(): void {
         register_graphql_fields('GrilleSlot', [
-            'date' => [
+            'slotDate' => [
                 'type'        => 'String',
                 'description' => 'Date du créneau au format YYYY-MM-DD',
                 'resolve'     => function ($post) {
@@ -37,7 +37,7 @@ class Grille_GraphQL {
                     if (!$emission_id) return null;
                     $emission = get_post($emission_id);
                     if (!$emission || $emission->post_status !== 'publish') return null;
-                    return $emission;
+                    return new \WPGraphQL\Model\Post($emission);
                 },
             ],
         ]);

@@ -19,7 +19,7 @@ class Grille_CPT {
             'show_in_rest'        => false,
             'show_in_graphql'     => true,
             'graphql_single_name' => 'grilleSlot',
-            'graphql_plural_name' => 'grilleSlots',
+            'graphql_plural_name' => 'allGrilleSlots',
             'supports'            => ['title'],
         ]);
     }
