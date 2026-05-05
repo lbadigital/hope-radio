@@ -31,7 +31,7 @@ class Grille_CPT {
             'single'          => true,
         ];
 
-        register_post_meta('grille_slot', 'weekday',     array_merge($args, ['type' => 'integer']));
+        register_post_meta('grille_slot', 'date',        array_merge($args, ['type' => 'string']));
         register_post_meta('grille_slot', 'heure_debut', array_merge($args, ['type' => 'string']));
         register_post_meta('grille_slot', 'heure_fin',   array_merge($args, ['type' => 'string']));
         register_post_meta('grille_slot', 'emission_id', array_merge($args, ['type' => 'integer']));

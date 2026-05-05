@@ -61,10 +61,11 @@ class Grille_Admin {
         );
 
         wp_localize_script('grille-admin', 'GrilleData', [
-            'ajaxUrl'   => admin_url('admin-ajax.php'),
-            'nonce'     => wp_create_nonce('grille_nonce'),
-            'emissions' => $this->get_emissions_list(),
-            'slots'     => $this->get_all_slots(),
+            'ajaxUrl'     => admin_url('admin-ajax.php'),
+            'nonce'       => wp_create_nonce('grille_nonce'),
+            'emissions'   => $this->get_emissions_list(),
+            'slots'       => $this->get_all_slots(),
+            'currentYear' => (int) date('Y'),
         ]);
     }
 
@@ -75,6 +76,7 @@ class Grille_Admin {
             <div id="grille-calendar"></div>
         </div>
 
+        <!-- Modal créneau (création / édition) -->
         <div id="grille-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="grille-modal-title">
             <div id="grille-modal-overlay"></div>
             <div id="grille-modal-box">
@@ -91,16 +93,8 @@ class Grille_Admin {
                 </div>
 
                 <div class="grille-field">
-                    <label>Jours</label>
-                    <div class="grille-days-grid">
-                        <label><input type="checkbox" name="grille-weekday-cb" value="1"><span>Lundi</span></label>
-                        <label><input type="checkbox" name="grille-weekday-cb" value="2"><span>Mardi</span></label>
-                        <label><input type="checkbox" name="grille-weekday-cb" value="3"><span>Mercredi</span></label>
-                        <label><input type="checkbox" name="grille-weekday-cb" value="4"><span>Jeudi</span></label>
-                        <label><input type="checkbox" name="grille-weekday-cb" value="5"><span>Vendredi</span></label>
-                        <label><input type="checkbox" name="grille-weekday-cb" value="6"><span>Samedi</span></label>
-                        <label><input type="checkbox" name="grille-weekday-cb" value="0"><span>Dimanche</span></label>
-                    </div>
+                    <label for="grille-slot-date">Date</label>
+                    <input type="date" id="grille-slot-date" required />
                 </div>
 
                 <div class="grille-field">
@@ -123,6 +117,7 @@ class Grille_Admin {
             </div>
         </div>
 
+        <!-- Modal duplication de jour -->
         <div id="grille-modal-dup" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="grille-dup-title">
             <div id="grille-modal-dup-overlay"></div>
             <div id="grille-modal-dup-box">
@@ -130,7 +125,7 @@ class Grille_Admin {
                 <p style="margin:0 0 12px;">Copier tous les créneaux vers :</p>
 
                 <div id="grille-dup-days" class="grille-days-grid">
-                    <!-- Checkboxes générées dynamiquement en JS -->
+                    <!-- Checkboxes générées dynamiquement en JS (autres jours de la même semaine) -->
                 </div>
 
                 <div class="grille-field" style="margin-top:14px;">
@@ -155,6 +150,41 @@ class Grille_Admin {
                 <div id="grille-dup-error" class="notice notice-error" style="display:none;"></div>
             </div>
         </div>
+
+        <!-- Modal duplication de semaine -->
+        <div id="grille-modal-dup-week" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="grille-dup-week-title">
+            <div id="grille-modal-dup-week-overlay"></div>
+            <div id="grille-modal-dup-week-box">
+                <h2 id="grille-dup-week-title">Dupliquer <span id="grille-dup-week-source-label"></span></h2>
+                <p style="margin:0 0 16px;">Copier tous les créneaux de cette semaine vers :</p>
+
+                <div class="grille-field">
+                    <label for="grille-dup-week-target">Semaine cible</label>
+                    <input type="week" id="grille-dup-week-target" style="width:100%;box-sizing:border-box;" />
+                </div>
+
+                <div class="grille-field">
+                    <label style="font-weight:normal;cursor:pointer;">
+                        <input type="checkbox" id="grille-dup-week-all-year" style="width:auto;margin-right:6px;" />
+                        Toutes les semaines de <span id="grille-dup-week-year-label"></span>
+                    </label>
+                </div>
+
+                <div class="grille-field">
+                    <label style="font-weight:normal;cursor:pointer;">
+                        <input type="checkbox" id="grille-dup-week-replace" style="width:auto;margin-right:6px;" />
+                        Remplacer les créneaux existants
+                    </label>
+                </div>
+
+                <div class="grille-modal-actions">
+                    <button type="button" id="grille-btn-dup-week-confirm" class="button button-primary">Dupliquer</button>
+                    <button type="button" id="grille-btn-dup-week-cancel"  class="button">Annuler</button>
+                </div>
+
+                <div id="grille-dup-week-error" class="notice notice-error" style="display:none;"></div>
+            </div>
+        </div>
         <?php
     }
 
@@ -177,27 +207,41 @@ class Grille_Admin {
     }
 
     private function get_all_slots(): array {
+        $year  = (int) date('Y');
         $posts = get_posts([
             'post_type'      => 'grille_slot',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
-            'orderby'        => 'meta_value_num',
-            'meta_key'       => 'weekday',
+            'orderby'        => 'meta_value',
+            'meta_key'       => 'date',
             'order'          => 'ASC',
+            'meta_query'     => [[
+                'key'     => 'date',
+                'value'   => [$year . '-01-01', $year . '-12-31'],
+                'compare' => 'BETWEEN',
+                'type'    => 'DATE',
+            ]],
         ]);
 
-        return array_map(function ($post) {
+        $slots = [];
+        foreach ($posts as $post) {
+            $date = get_post_meta($post->ID, 'date', true);
+            if (!$date || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                continue; // ignorer les anciens slots sans date valide
+            }
             $emission_id = (int) get_post_meta($post->ID, 'emission_id', true);
-            return [
+            $slots[] = [
                 'postId'     => $post->ID,
                 'id'         => 'slot-' . $post->ID,
                 'title'      => $post->post_title,
-                'weekday'    => (int) get_post_meta($post->ID, 'weekday', true),
+                'date'       => $date,
                 'heureDebut' => get_post_meta($post->ID, 'heure_debut', true),
                 'heureFin'   => get_post_meta($post->ID, 'heure_fin', true),
                 'emissionId' => $emission_id,
                 'color'      => self::PALETTE[$emission_id % count(self::PALETTE)],
             ];
-        }, $posts);
+        }
+
+        return $slots;
     }
 }

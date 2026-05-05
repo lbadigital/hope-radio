@@ -5,6 +5,19 @@
     margin-top: 16px;
 }
 
+/* Bouton custom FullCalendar "Dupliquer la semaine" */
+.fc-dupWeekBtn-button {
+    background: #f0f0f1 !important;
+    border-color: #ddd !important;
+    color: #3c3c3c !important;
+    font-size: 13px !important;
+}
+
+.fc-dupWeekBtn-button:hover {
+    background: #e0e0e0 !important;
+    color: #000 !important;
+}
+
 /* Modal overlay + boîte */
 #grille-modal {
     position: fixed;
@@ -68,7 +81,7 @@
     padding: 8px 12px;
 }
 
-/* Sélection multi-jours (mode création) */
+/* Sélection multi-jours (duplication de jour) */
 .grille-days-grid {
     display: flex;
     flex-wrap: wrap;
@@ -101,7 +114,7 @@
     margin: 0;
 }
 
-/* Modal duplication — structure partagée avec le modal principal */
+/* Modal duplication jour */
 #grille-modal-dup {
     position: fixed;
     inset: 0;
@@ -135,6 +148,44 @@
 }
 
 #grille-dup-error {
+    margin-top: 12px;
+    padding: 8px 12px;
+}
+
+/* Modal duplication semaine */
+#grille-modal-dup-week {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+}
+
+#grille-modal-dup-week-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+#grille-modal-dup-week-box {
+    position: relative;
+    background: #fff;
+    border-radius: 6px;
+    padding: 28px 32px;
+    width: 440px;
+    max-width: 95vw;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    z-index: 1;
+}
+
+#grille-dup-week-title {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#grille-dup-week-error {
     margin-top: 12px;
     padding: 8px 12px;
 }
