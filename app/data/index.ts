@@ -19,3 +19,8 @@ export type { FeaturedSlide, PostType }       from './hero/transformer';
 export { MOCK_ACTUALITES }                    from './actualites/mock-actualites';
 export { transformActualites }                from './actualites/transformer';
 export type { ActualiteCard }                 from './actualites/transformer';
+
+// Grille
+export { MOCK_GRILLE_SLOTS }                  from './grille/mock-grille';
+export { transformGrilleSlots }               from './grille/transformer';
+export type { EmissionSlot }                  from './grille/transformer';
