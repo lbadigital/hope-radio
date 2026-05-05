@@ -3,7 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    remotePatterns: [new URL('https://api-radio.lba-digital.fr/**'), new URL('http://hoperadiofrance.fr/**')],
+    remotePatterns: [
+      new URL('https://api-radio.lba-digital.fr/**'),
+      new URL('http://hoperadiofrance.fr/**'),
+      new URL('http://localhost:8080/**'),
+    ],
   }
 };
 
