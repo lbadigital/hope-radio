@@ -1,12 +1,8 @@
 import type { GetGrilleSlotsData } from '@/graphql/grille';
 
-const TODAY = new Date().toISOString().split('T')[0];
-
 export const MOCK_GRILLE_SLOTS: GetGrilleSlotsData = {
   grilleSlots: [
     {
-      id:         '1',
-      date:       TODAY,
       heureDebut: '08:30',
       heureFin:   '09:30',
       emission: {
@@ -22,8 +18,6 @@ export const MOCK_GRILLE_SLOTS: GetGrilleSlotsData = {
       },
     },
     {
-      id:         '2',
-      date:       TODAY,
       heureDebut: '11:30',
       heureFin:   '12:30',
       emission: {
@@ -39,8 +33,6 @@ export const MOCK_GRILLE_SLOTS: GetGrilleSlotsData = {
       },
     },
     {
-      id:         '3',
-      date:       TODAY,
       heureDebut: '16:00',
       heureFin:   '17:00',
       emission: {
@@ -56,8 +48,6 @@ export const MOCK_GRILLE_SLOTS: GetGrilleSlotsData = {
       },
     },
     {
-      id:         '4',
-      date:       TODAY,
       heureDebut: '19:00',
       heureFin:   '20:00',
       emission: {
