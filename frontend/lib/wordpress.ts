@@ -44,11 +44,17 @@ export async function fetchGraphQL<T>(
     process.env.WORDPRESS_API_URL ?? process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT;
   if (!endpoint) throw new Error('No GraphQL endpoint configured');
 
+  // next.revalidate et cache: 'no-store' sont incompatibles dans Next.js.
+  // On n'applique le revalidate par défaut que si le caller ne spécifie pas cache.
+  const defaultCache: RequestInit = fetchOptions?.cache
+    ? {}
+    : { next: { revalidate: 3600 } };
+
   const fetchPromise = fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables }),
-    next: { revalidate: 3600 },
+    ...defaultCache,
     ...fetchOptions,
   }).then(async (res) => {
     if (!res.ok) throw new Error(`GraphQL request failed: ${res.status}`);
