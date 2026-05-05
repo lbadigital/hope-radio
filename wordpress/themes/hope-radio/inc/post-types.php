@@ -1,6 +1,24 @@
 <?php
 
 add_action('init', function () {
+    register_taxonomy('emission_categorie', ['emission'], [
+        'labels' => [
+            'name'              => __('Catégories d\'émission', 'hope-radio'),
+            'singular_name'     => __('Catégorie d\'émission', 'hope-radio'),
+            'add_new_item'      => __('Ajouter une catégorie', 'hope-radio'),
+            'edit_item'         => __('Modifier la catégorie', 'hope-radio'),
+            'not_found'         => __('Aucune catégorie trouvée', 'hope-radio'),
+        ],
+        'hierarchical'        => true,
+        'show_ui'             => true,
+        'show_admin_column'   => true,
+        'show_in_rest'        => true,
+        'show_in_graphql'     => true,
+        'graphql_single_name' => 'emissionCategory',
+        'graphql_plural_name' => 'emissionCategories',
+        'rewrite'             => ['slug' => 'categorie-emission'],
+    ]);
+
     register_post_type('emission', [
         'labels' => [
             'name'               => __('Émissions', 'hope-radio'),
