@@ -13,10 +13,12 @@ Hope Radio est un site de radio chrétienne francophone en architecture headless
 WordPress est **uniquement un back-office** : aucune page n'est affichée aux visiteurs.
 Le contenu est exposé via **WPGraphQL** et consommé par un front Next.js.
 
-La "Grille des programmes" est la planification hebdomadaire récurrente des émissions :
-chaque case associe une **Émission** (CPT `emission`) à un créneau horaire sur un jour de la semaine.
+La "Grille des programmes" est la planification des émissions par semaine calendaire.
+Chaque créneau associe une **Émission** (CPT `emission`) à un jour et une plage horaire précis,
+avec une vraie date `YYYY-MM-DD`.
 
-La grille est **récurrente** : elle représente une semaine-type, sans dates calendaires.
+La grille n'est **pas récurrente** : chaque semaine est indépendante. L'utilisateur peut
+dupliquer une semaine vers une autre (ou vers toutes les semaines de l'année) pour faciliter le remplissage.
 
 ---
 
@@ -27,9 +29,6 @@ La grille est **récurrente** : elle représente une semaine-type, sans dates ca
 **Aucune dépendance externe requise** — le bundle standard est autonome.
 
 ### CDN à utiliser (vanilla JS, standard bundle)
-
-Le standard bundle inclut tous les plugins nécessaires (`timeGrid`, `interaction`, locales).
-Un seul fichier à charger :
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js"></script>
@@ -43,28 +42,27 @@ Pour la locale française, ajouter **après** le bundle :
 
 > ⚠️ Ne pas utiliser les anciens bundles jQuery (v3 et antérieur). FullCalendar v6 est vanilla JS pur.
 
-### Format d'un event récurrent (grille hebdomadaire)
+### Format d'un event daté
 
-FullCalendar supporte nativement les événements récurrents sans date via `daysOfWeek` :
+Les créneaux utilisent des dates réelles (`start`/`end` ISO datetime) — pas de récurrence :
 
 ```js
 {
-    id:          'slot-42',     // identifiant unique (string)
-    title:       'Le Morning',  // titre de l'émission
-    daysOfWeek:  [1],           // tableau : 0=dimanche, 1=lundi, ..., 6=samedi
-    startTime:   '08:00:00',    // HH:MM:SS
-    endTime:     '09:00:00',    // HH:MM:SS
-    color:       '#3498db',     // couleur de fond (hex)
+    id:    'slot-42',
+    title: 'Le Morning',
+    start: '2026-05-04T08:00:00',   // YYYY-MM-DDTHH:MM:SS (heure locale)
+    end:   '2026-05-04T09:00:00',
+    color: '#3498db',
     extendedProps: {
-        emissionId: 42,         // ID WordPress du post emission
-        postId:     7,          // ID WordPress du post grille_slot
+        emissionId: 42,
+        postId:     7,
+        date:       '2026-05-04',   // YYYY-MM-DD, utilisé pour drag & drop
     }
 }
 ```
 
-> `daysOfWeek` est un tableau d'entiers. Un créneau qui couvre plusieurs jours
-> (ex : lundi et mardi) aurait `daysOfWeek: [1, 2]` — mais pour la grille radio,
-> chaque créneau ne couvre **qu'un seul jour** : `daysOfWeek: [n]`.
+> Ne jamais utiliser `daysOfWeek` + `startTime` + `endTime` — ce format est réservé aux
+> événements récurrents et ferait apparaître le créneau sur toutes les semaines.
 
 ### Callbacks clés
 
@@ -72,51 +70,39 @@ FullCalendar supporte nativement les événements récurrents sans date via `day
 |---|---|---|
 | `select` | `(info)` | L'utilisateur dessine une plage horaire vide |
 | `eventClick` | `(info)` | Clic sur un créneau existant → édition |
-| `eventDrop` | `(info)` | Drag & drop d'un créneau |
+| `eventDrop` | `(info)` | Drag & drop d'un créneau (peut changer la date) |
 | `eventResize` | `(info)` | Redimensionnement d'un créneau |
+| `dayHeaderDidMount` | `(arg)` | Injection d'un bouton de duplication dans l'en-tête de colonne |
 
 **Accès aux données dans les callbacks :**
 
 ```js
 // select
 select: function(info) {
-    // info.startStr  → "2026-05-04T08:00:00"
-    // info.endStr    → "2026-05-04T09:00:00"
-    // info.start.getDay() → jour de la semaine (0-6)
+    // info.start  → objet Date (heure locale)
+    // info.end    → objet Date
+    // getDateStr(info.start) → "2026-05-04" (helper local, pas toISOString)
+    // formatTime(info.start) → "08:00"
 }
 
-// eventClick
-eventClick: function(info) {
-    // info.event.id               → 'slot-42'
-    // info.event.title            → 'Le Morning'
-    // info.event.extendedProps.emissionId
-    // info.event.extendedProps.postId
-}
-
-// eventDrop / eventResize
+// eventDrop
 eventDrop: function(info) {
-    // info.event.id
-    // info.event.startStr         → nouvelle heure de début (ISO)
-    // info.event.endStr           → nouvelle heure de fin (ISO)
-    // info.event.start.getDay()   → nouveau jour de la semaine
-    // info.revert()               → annule le déplacement (à appeler si AJAX échoue)
+    // info.event.extendedProps.postId
+    // getDateStr(info.event.start) → nouvelle date si changement de jour
+    // info.event.setExtendedProp('date', newDate) → mettre à jour extendedProps
+    // info.revert() → annuler si AJAX échoue
 }
 ```
+
+> **Important** : utiliser `getDateStr(date)` (helper local via `getFullYear/getMonth/getDate`)
+> et non `date.toISOString().slice(0, 10)` — ce dernier peut décaler la date en dehors de UTC.
 
 ### Méthodes de l'instance
 
 ```js
-// Ajouter un event
-calendar.addEvent({ id, title, daysOfWeek, startTime, endTime, color, extendedProps });
-
-// Récupérer un event par son id
-const event = calendar.getEventById('slot-42');
-
-// Mettre à jour un event (après save AJAX)
-event.setProp('title', 'Nouveau titre');
-event.setExtendedProp('emissionId', 43);
-
-// Supprimer un event
+calendar.addEvent({ id, title, start, end, color, extendedProps });
+calendar.getEventById('slot-42');
+event.setExtendedProp('date', '2026-05-05');
 event.remove();
 ```
 
@@ -124,20 +110,18 @@ event.remove();
 
 ## Structure des fichiers
 
-Tout le code est isolé dans :
-
 ```
 wordpress/wp-content/themes/hope-radio/grille/
 ├── grille.php                ← point d'entrée, chargé via functions.php
-├── class-grille-cpt.php      ← enregistrement du CPT grille_slot
-├── class-grille-graphql.php  ← enregistrement des champs WPGraphQL
-├── class-grille-admin.php    ← page admin + enqueue des assets
-├── class-grille-ajax.php     ← handlers AJAX (save, update, delete)
+├── class-grille-cpt.php      ← enregistrement du CPT grille_slot + metas
+├── class-grille-graphql.php  ← champs WPGraphQL
+├── class-grille-admin.php    ← page admin + enqueue + HTML des modals
+├── class-grille-ajax.php     ← 6 handlers AJAX
 ├── assets/
 │   ├── css/
-│   │   └── grille-admin.css  ← styles de la page admin uniquement
+│   │   └── grille-admin.css  ← styles page admin uniquement
 │   └── js/
-│       └── grille-admin.js   ← initialisation FullCalendar + logique modal
+│       └── grille-admin.js   ← FullCalendar + modals + AJAX
 ```
 
 `functions.php` n'ajoute qu'**une seule ligne** :
@@ -146,25 +130,19 @@ wordpress/wp-content/themes/hope-radio/grille/
 require_once get_template_directory() . '/grille/grille.php';
 ```
 
-`grille.php` instancie les classes et appelle leurs méthodes `init()` qui branchent les hooks.
-
 ---
 
-## Ce qu'il faut faire
-
-### 1. CPT `grille_slot`
+## 1. CPT `grille_slot`
 
 Fichier : `class-grille-cpt.php`
 
 ```php
 register_post_type('grille_slot', [
-    'labels'              => [
-        'name'          => 'Créneaux',
-        'singular_name' => 'Créneau',
-    ],
+    'labels'              => ['name' => 'Créneaux', 'singular_name' => 'Créneau'],
     'public'              => false,
-    'show_ui'             => false,   // pas de liste admin native
-    'show_in_rest'        => false,   // pas d'API REST
+    'show_ui'             => false,
+    'show_in_nav_menus'   => false,
+    'show_in_rest'        => false,
     'show_in_graphql'     => true,
     'graphql_single_name' => 'grilleSlot',
     'graphql_plural_name' => 'grilleSlots',
@@ -172,40 +150,32 @@ register_post_type('grille_slot', [
 ]);
 ```
 
-**Champs meta** — enregistrés via `register_post_meta()` natif WordPress :
+**Champs meta** (enregistrés via `register_post_meta()`, tous `show_in_rest: false`, `show_in_graphql: false`) :
 
-| Meta key      | Type    | Description                                        |
-|---------------|---------|----------------------------------------------------|
-| `weekday`     | integer | Entier 0–6 (0=dimanche, 1=lundi, …, 6=samedi)     |
-| `heure_debut` | string  | Format `HH:MM` (ex : `08:00`)                      |
-| `heure_fin`   | string  | Format `HH:MM` (ex : `09:00`)                      |
-| `emission_id` | integer | `ID` du post de type `emission` associé            |
-
-Tous avec `show_in_rest: false`, `show_in_graphql: false` (exposition manuelle en GraphQL).
+| Meta key      | Type    | Description                                  |
+|---------------|---------|----------------------------------------------|
+| `date`        | string  | Date du créneau `YYYY-MM-DD`                 |
+| `heure_debut` | string  | Heure de début `HH:MM` (ex : `08:00`)        |
+| `heure_fin`   | string  | Heure de fin `HH:MM` (ex : `09:00`)          |
+| `emission_id` | integer | ID du post `emission` associé                |
 
 ---
 
-### 2. Page d'administration
+## 2. Page d'administration
 
 Fichier : `class-grille-admin.php`
 
-**Enregistrement du menu :**
+**Menu :**
 
 ```php
-add_action('admin_menu', function() {
-    add_menu_page(
-        'Grille des programmes',
-        'Grille',
-        'edit_posts',
-        'hope-radio-grille',
-        [ $this, 'render_page' ],
-        'dashicons-schedule',
-        25
-    );
-});
+add_menu_page(
+    'Grille des programmes', 'Grille', 'edit_posts',
+    'hope-radio-grille', [$this, 'render_page'],
+    'dashicons-schedule', 25
+);
 ```
 
-**Rendu HTML de la page :**
+**Rendu HTML :**
 
 ```html
 <div class="wrap">
@@ -213,114 +183,108 @@ add_action('admin_menu', function() {
     <div id="grille-calendar"></div>
 </div>
 
-<!-- Modal créneau -->
+<!-- Modal créneau (création / édition) -->
 <div id="grille-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="grille-modal-title">
     <div id="grille-modal-overlay"></div>
     <div id="grille-modal-box">
         <h2 id="grille-modal-title">Créneau</h2>
+        <input type="hidden" id="grille-slot-id" />       <!-- "slot-{postId}" -->
+        <input type="hidden" id="grille-slot-post-id" />  <!-- postId WordPress -->
 
-        <!-- Champs cachés -->
-        <input type="hidden" id="grille-slot-id" />     <!-- guid FullCalendar : "slot-{postId}" -->
-        <input type="hidden" id="grille-slot-post-id" /> <!-- postId WordPress -->
-
-        <!-- Émission -->
         <div class="grille-field">
             <label for="grille-emission-id">Émission</label>
             <select id="grille-emission-id" required>
                 <option value="">— Choisir une émission —</option>
-                <!-- Options injectées via wp_localize_script → GrilleData.emissions -->
             </select>
         </div>
-
-        <!-- Jour -->
         <div class="grille-field">
-            <label for="grille-weekday">Jour</label>
-            <select id="grille-weekday">
-                <option value="0">Dimanche</option>
-                <option value="1">Lundi</option>
-                <option value="2">Mardi</option>
-                <option value="3">Mercredi</option>
-                <option value="4">Jeudi</option>
-                <option value="5">Vendredi</option>
-                <option value="6">Samedi</option>
-            </select>
+            <label for="grille-slot-date">Date</label>
+            <input type="date" id="grille-slot-date" required />
         </div>
-
-        <!-- Horaires -->
         <div class="grille-field">
             <label for="grille-heure-debut">Début</label>
             <input type="time" id="grille-heure-debut" step="900" required />
-            <!-- step="900" → intervalles de 15 min -->
         </div>
         <div class="grille-field">
             <label for="grille-heure-fin">Fin</label>
             <input type="time" id="grille-heure-fin" step="900" required />
         </div>
-
-        <!-- Actions -->
         <div class="grille-modal-actions">
             <button type="button" id="grille-btn-save"   class="button button-primary">Enregistrer</button>
             <button type="button" id="grille-btn-delete" class="button button-link-delete" style="display:none;">Supprimer</button>
             <button type="button" id="grille-btn-cancel" class="button">Annuler</button>
         </div>
-
         <div id="grille-modal-error" class="notice notice-error" style="display:none;"></div>
+    </div>
+</div>
+
+<!-- Modal duplication de jour -->
+<div id="grille-modal-dup" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="grille-dup-title">
+    <div id="grille-modal-dup-overlay"></div>
+    <div id="grille-modal-dup-box">
+        <h2 id="grille-dup-title">Dupliquer <span id="grille-dup-source-label"></span></h2>
+        <p>Copier tous les créneaux vers :</p>
+        <div id="grille-dup-days" class="grille-days-grid">
+            <!-- Checkboxes des 6 autres jours de la semaine, générées en JS -->
+        </div>
+        <div class="grille-field">
+            <label><input type="checkbox" id="grille-dup-all" /> Toute la semaine</label>
+        </div>
+        <div class="grille-field">
+            <label><input type="checkbox" id="grille-dup-replace" /> Remplacer les créneaux existants du jour cible</label>
+        </div>
+        <div class="grille-modal-actions">
+            <button type="button" id="grille-btn-dup-confirm" class="button button-primary">Dupliquer</button>
+            <button type="button" id="grille-btn-dup-cancel"  class="button">Annuler</button>
+        </div>
+        <div id="grille-dup-error" class="notice notice-error" style="display:none;"></div>
+    </div>
+</div>
+
+<!-- Modal duplication de semaine -->
+<div id="grille-modal-dup-week" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="grille-dup-week-title">
+    <div id="grille-modal-dup-week-overlay"></div>
+    <div id="grille-modal-dup-week-box">
+        <h2 id="grille-dup-week-title">Dupliquer <span id="grille-dup-week-source-label"></span></h2>
+        <p>Copier tous les créneaux de cette semaine vers :</p>
+        <div class="grille-field">
+            <label for="grille-dup-week-target">Semaine cible</label>
+            <input type="week" id="grille-dup-week-target" />
+        </div>
+        <div class="grille-field">
+            <label>
+                <input type="checkbox" id="grille-dup-week-all-year" />
+                Toutes les semaines de <span id="grille-dup-week-year-label"></span>
+            </label>
+        </div>
+        <div class="grille-field">
+            <label><input type="checkbox" id="grille-dup-week-replace" /> Remplacer les créneaux existants</label>
+        </div>
+        <div class="grille-modal-actions">
+            <button type="button" id="grille-btn-dup-week-confirm" class="button button-primary">Dupliquer</button>
+            <button type="button" id="grille-btn-dup-week-cancel"  class="button">Annuler</button>
+        </div>
+        <div id="grille-dup-week-error" class="notice notice-error" style="display:none;"></div>
     </div>
 </div>
 ```
 
-**Enqueue des assets — uniquement sur cette page admin :**
+**Enqueue des assets :**
 
 ```php
-add_action('admin_enqueue_scripts', function(string $hook): void {
-    if ($hook !== 'toplevel_page_hope-radio-grille') return;
-
-    // FullCalendar standard bundle (inclut timeGrid + interaction)
-    wp_enqueue_script(
-        'fullcalendar',
-        'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js',
-        [],
-        '6.1.20',
-        true
-    );
-
-    // Locale française
-    wp_enqueue_script(
-        'fullcalendar-fr',
-        'https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.20/locales/fr.global.min.js',
-        ['fullcalendar'],
-        '6.1.20',
-        true
-    );
-
-    // Assets locaux
-    wp_enqueue_style(
-        'grille-admin',
-        get_template_directory_uri() . '/grille/assets/css/grille-admin.css',
-        [],
-        '1.0.0'
-    );
-    wp_enqueue_script(
-        'grille-admin',
-        get_template_directory_uri() . '/grille/assets/js/grille-admin.js',
-        ['fullcalendar', 'fullcalendar-fr'],
-        '1.0.0',
-        true
-    );
-
-    // Données injectées en JS
-    wp_localize_script('grille-admin', 'GrilleData', [
-        'ajaxUrl'   => admin_url('admin-ajax.php'),
-        'nonce'     => wp_create_nonce('grille_nonce'),
-        'emissions' => $this->get_emissions_list(),
-        // Format : [ { id: 42, title: "Le Morning", color: "#3498db" }, ... ]
-        'slots'     => $this->get_all_slots(),
-        // Format : voir section "Format des slots injectés" ci-dessous
-    ]);
-});
+// Enregistré uniquement sur $hook === 'toplevel_page_hope-radio-grille'
+wp_localize_script('grille-admin', 'GrilleData', [
+    'ajaxUrl'     => admin_url('admin-ajax.php'),
+    'nonce'       => wp_create_nonce('grille_nonce'),
+    'emissions'   => $this->get_emissions_list(),
+    'slots'       => $this->get_all_slots(),
+    'currentYear' => (int) date('Y'),
+]);
 ```
 
 **Format des slots injectés (`get_all_slots()`) :**
+
+Limité à l'année en cours via `meta_query BETWEEN`. Les slots sans meta `date` valide sont ignorés.
 
 ```json
 [
@@ -328,7 +292,7 @@ add_action('admin_enqueue_scripts', function(string $hook): void {
         "postId":     7,
         "id":         "slot-7",
         "title":      "Le Morning",
-        "weekday":    1,
+        "date":       "2026-05-04",
         "heureDebut": "08:00",
         "heureFin":   "09:00",
         "emissionId": 42,
@@ -337,450 +301,225 @@ add_action('admin_enqueue_scripts', function(string $hook): void {
 ]
 ```
 
-**Format des émissions injectées (`get_emissions_list()`) :**
+**Format des émissions injectées :**
 
 ```json
-[
-    { "id": 42, "title": "Le Morning",    "color": "#3498db" },
-    { "id": 43, "title": "L'Après-midi", "color": "#e74c3c" }
-]
+[{ "id": 42, "title": "Le Morning", "color": "#3498db" }]
 ```
 
-La couleur est générée de manière **déterministe** : `PALETTE[$emission_id % count(PALETTE)]`
-sur une palette fixe de 12 couleurs hex définie comme constante dans la classe.
+La couleur est déterministe : `PALETTE[$emission_id % count(PALETTE)]`
+sur une palette fixe de 12 couleurs hex (constante de classe).
 
 ---
 
-### 3. Initialisation FullCalendar (`grille-admin.js`)
+## 3. Initialisation FullCalendar (`grille-admin.js`)
+
+### Configuration
 
 ```js
-document.addEventListener('DOMContentLoaded', function () {
-
-    // ── Populer le select des émissions ──────────────────────────────────────
-    const selectEmission = document.getElementById('grille-emission-id');
-    GrilleData.emissions.forEach(function (em) {
-        const opt = document.createElement('option');
-        opt.value       = em.id;
-        opt.textContent = em.title;
-        selectEmission.appendChild(opt);
-    });
-
-    // ── Convertir les slots WP en events FullCalendar ─────────────────────────
-    const initialEvents = GrilleData.slots.map(function (slot) {
-        return {
-            id:          slot.id,               // "slot-{postId}"
-            title:       slot.title,
-            daysOfWeek:  [parseInt(slot.weekday, 10)],
-            startTime:   slot.heureDebut + ':00', // "08:00:00"
-            endTime:     slot.heureFin   + ':00', // "09:00:00"
-            color:       slot.color,
-            extendedProps: {
-                emissionId: slot.emissionId,
-                postId:     slot.postId,
-            },
-        };
-    });
-
-    // ── Initialisation FullCalendar ───────────────────────────────────────────
-    const calendarEl = document.getElementById('grille-calendar');
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        locale:           'fr',
-        initialView:      'timeGridWeek',
-        allDaySlot:       false,
-        slotMinTime:      '05:00:00',
-        slotMaxTime:      '24:00:00',
-        slotDuration:     '00:15:00',   // grille toutes les 15 min
-        slotLabelInterval:'01:00:00',   // labels toutes les heures
-        height:           'auto',
-        selectable:       true,         // permet de dessiner un créneau
-        editable:         true,         // active drag & drop + resize
-        eventOverlap:     false,        // interdit les chevauchements
-        headerToolbar:    false,        // on n'a pas besoin de navigation de date
-        events:           initialEvents,
-
-        // Dessin d'une nouvelle plage horaire
-        select: function (info) {
-            const weekday    = info.start.getDay();
-            const heureDebut = formatTime(info.start);
-            const heureFin   = formatTime(info.end);
-            openModal('create', {
-                weekday:    weekday,
-                heureDebut: heureDebut,
-                heureFin:   heureFin,
-            });
-            calendar.unselect();
+var calendar = new FullCalendar.Calendar(calendarEl, {
+    locale:            'fr',
+    initialView:       'timeGridWeek',
+    allDaySlot:        false,
+    slotMinTime:       '05:00:00',
+    slotMaxTime:       '24:00:00',
+    slotDuration:      '00:15:00',
+    slotLabelInterval: '01:00:00',
+    height:            'auto',
+    selectable:        true,
+    editable:          true,
+    eventOverlap:      false,
+    headerToolbar: {
+        left:   'prev,next today dupWeekBtn',
+        center: 'title',
+        right:  '',
+    },
+    customButtons: {
+        dupWeekBtn: {
+            text:  '⧉ Dupliquer la semaine',
+            click: function () { openDupWeekModal(); },
         },
-
-        // Clic sur un créneau existant → mode édition
-        eventClick: function (info) {
-            openModal('edit', {
-                id:         info.event.id,
-                postId:     info.event.extendedProps.postId,
-                emissionId: info.event.extendedProps.emissionId,
-                weekday:    info.event.start.getDay(),
-                heureDebut: formatTime(info.event.start),
-                heureFin:   formatTime(info.event.end),
-            });
-        },
-
-        // Drag & drop → sauvegarde silencieuse
-        eventDrop: function (info) {
-            ajaxUpdateSlot(
-                {
-                    postId:     info.event.extendedProps.postId,
-                    weekday:    info.event.start.getDay(),
-                    heureDebut: formatTime(info.event.start),
-                    heureFin:   formatTime(info.event.end),
-                },
-                null,
-                function () { info.revert(); } // annuler si erreur AJAX
-            );
-        },
-
-        // Resize → sauvegarde silencieuse
-        eventResize: function (info) {
-            ajaxUpdateSlot(
-                {
-                    postId:     info.event.extendedProps.postId,
-                    weekday:    info.event.start.getDay(),
-                    heureDebut: formatTime(info.event.start),
-                    heureFin:   formatTime(info.event.end),
-                },
-                null,
-                function () { info.revert(); }
-            );
-        },
-    });
-
-    calendar.render();
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    /** Extrait "HH:MM" depuis un objet Date. */
-    function formatTime(date) {
-        return date.toTimeString().slice(0, 5);
-    }
-
-    // ── Modal ─────────────────────────────────────────────────────────────────
-
-    const modal        = document.getElementById('grille-modal');
-    const overlay      = document.getElementById('grille-modal-overlay');
-    const errorBox     = document.getElementById('grille-modal-error');
-    const btnDelete    = document.getElementById('grille-btn-delete');
-
-    function openModal(mode, data) {
-        document.getElementById('grille-slot-id').value       = data.id       || '';
-        document.getElementById('grille-slot-post-id').value  = data.postId   || '';
-        document.getElementById('grille-emission-id').value   = data.emissionId || '';
-        document.getElementById('grille-weekday').value       = data.weekday  !== undefined ? data.weekday : '';
-        document.getElementById('grille-heure-debut').value   = data.heureDebut || '';
-        document.getElementById('grille-heure-fin').value     = data.heureFin  || '';
-
-        btnDelete.style.display = (mode === 'edit') ? 'inline-block' : 'none';
-        errorBox.style.display  = 'none';
-        modal.style.display     = 'flex';
-        document.getElementById('grille-emission-id').focus();
-    }
-
-    function closeModal() {
-        modal.style.display = 'none';
-    }
-
-    overlay.addEventListener('click', closeModal);
-    document.getElementById('grille-btn-cancel').addEventListener('click', closeModal);
-
-    // Fermeture au clavier (Escape)
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
-    });
-
-    // ── Bouton Enregistrer ────────────────────────────────────────────────────
-
-    document.getElementById('grille-btn-save').addEventListener('click', function () {
-        const emissionId  = document.getElementById('grille-emission-id').value;
-        const weekday     = document.getElementById('grille-weekday').value;
-        const heureDebut  = document.getElementById('grille-heure-debut').value;
-        const heureFin    = document.getElementById('grille-heure-fin').value;
-        const slotId      = document.getElementById('grille-slot-id').value;
-        const postId      = document.getElementById('grille-slot-post-id').value;
-
-        if (!emissionId || !heureDebut || !heureFin) {
-            showError('Veuillez remplir tous les champs obligatoires.');
-            return;
-        }
-
-        ajaxSaveSlot(
-            { emissionId, weekday, heureDebut, heureFin, slotId, postId },
-            function (saved) {
-                const emission = GrilleData.emissions.find(function(e) {
-                    return e.id == saved.emissionId;
-                });
-
-                if (slotId) {
-                    // Mise à jour d'un event existant
-                    const existing = calendar.getEventById(slotId);
-                    if (existing) existing.remove();
-                }
-
-                // Ajout (ou re-ajout) de l'event avec les données sauvegardées
-                calendar.addEvent({
-                    id:          'slot-' + saved.postId,
-                    title:       emission ? emission.title : 'Émission',
-                    daysOfWeek:  [parseInt(saved.weekday, 10)],
-                    startTime:   saved.heureDebut + ':00',
-                    endTime:     saved.heureFin   + ':00',
-                    color:       emission ? emission.color : '#999999',
-                    extendedProps: {
-                        emissionId: saved.emissionId,
-                        postId:     saved.postId,
-                    },
-                });
-
-                closeModal();
-            },
-            showError
-        );
-    });
-
-    // ── Bouton Supprimer ──────────────────────────────────────────────────────
-
-    btnDelete.addEventListener('click', function () {
-        const postId = document.getElementById('grille-slot-post-id').value;
-        const slotId = document.getElementById('grille-slot-id').value;
-
-        if (!confirm('Supprimer ce créneau définitivement ?')) return;
-
-        ajaxDeleteSlot(
-            postId,
-            function () {
-                const existing = calendar.getEventById(slotId);
-                if (existing) existing.remove();
-                closeModal();
-            },
-            showError
-        );
-    });
-
-    // ── Affichage d'erreur modal ──────────────────────────────────────────────
-
-    function showError(msg) {
-        errorBox.textContent    = msg;
-        errorBox.style.display  = 'block';
-    }
-
-    // ── AJAX helpers ─────────────────────────────────────────────────────────
-
-    function ajaxPost(action, data, onSuccess, onError) {
-        const body = new URLSearchParams(Object.assign({ action: action, nonce: GrilleData.nonce }, data));
-        fetch(GrilleData.ajaxUrl, { method: 'POST', body: body })
-            .then(function (r) { return r.json(); })
-            .then(function (json) {
-                if (json.success) {
-                    if (onSuccess) onSuccess(json.data);
-                } else {
-                    if (onError) onError(json.data || 'Une erreur est survenue.');
-                }
-            })
-            .catch(function () {
-                if (onError) onError('Erreur réseau.');
-            });
-    }
-
-    function ajaxSaveSlot(data, onSuccess, onError) {
-        ajaxPost('grille_save_slot', data, onSuccess, onError);
-    }
-
-    function ajaxUpdateSlot(data, onSuccess, onError) {
-        ajaxPost('grille_update_slot', data, onSuccess, onError);
-    }
-
-    function ajaxDeleteSlot(postId, onSuccess, onError) {
-        ajaxPost('grille_delete_slot', { postId: postId }, onSuccess, onError);
-    }
+    },
+    events: initialEvents,   // events datés avec start/end ISO
+    select:             ...,
+    eventClick:         ...,
+    eventDrop:          ...,
+    eventResize:        ...,
+    dayHeaderDidMount:  ...,
 });
 ```
 
----
+### Helpers JS clés
 
-### 4. Handlers AJAX (`class-grille-ajax.php`)
+```js
+// Extrait "YYYY-MM-DD" en heure locale (ne pas utiliser toISOString)
+function getDateStr(date) {
+    var y = date.getFullYear();
+    var m = String(date.getMonth() + 1).padStart(2, '0');
+    var d = String(date.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+}
 
-Trois actions AJAX. Toutes protégées par :
-```php
-check_ajax_referer('grille_nonce', 'nonce');
-if (!current_user_can('edit_posts')) { wp_send_json_error('Accès refusé.'); }
+// Extrait "HH:MM" depuis un objet Date
+function formatTime(date) {
+    return date.toTimeString().slice(0, 5);
+}
+
+// Trouve le lundi de la semaine d'une date donnée (ISO : lundi = 1)
+function getWeekMondayStr(dateStr) {
+    var d   = new Date(dateStr + 'T12:00:00');
+    var dow = d.getDay() === 0 ? 7 : d.getDay();
+    d.setDate(d.getDate() - (dow - 1));
+    return getDateStr(d);
+}
+
+// Convertit "YYYY-Www" (input[type=week]) → lundi YYYY-MM-DD (ISO 8601 : jan 4 = semaine 1)
+function weekInputToMonday(weekValue) { ... }
+
+// Inverse : lundi YYYY-MM-DD → "YYYY-Www"
+function dateToWeekInput(mondayStr) { ... }
 ```
 
-Enregistrement des hooks :
-```php
-add_action('wp_ajax_grille_save_slot',   [$this, 'save_slot']);
-add_action('wp_ajax_grille_update_slot', [$this, 'update_slot']);
-add_action('wp_ajax_grille_delete_slot', [$this, 'delete_slot']);
-```
+### Duplication de jour (`dayHeaderDidMount`)
+
+Un bouton `⧉` est injecté dans chaque en-tête de colonne. Il ouvre `openDupModal(dateStr)` qui :
+- calcule le lundi de la semaine via `getWeekMondayStr`
+- génère 6 checkboxes (les autres jours de la même semaine) avec leurs dates réelles
+- la checkbox "Toute la semaine" coche/décoche toutes les options
+
+### Duplication de semaine (`openDupWeekModal`)
+
+Bouton personnalisé dans le `headerToolbar`. Le modal :
+- pré-remplit `input[type=week]` avec la semaine suivante via `dateToWeekInput`
+- la checkbox "Toutes les semaines de [année]" désactive l'input semaine et appelle `grille_duplicate_week_year`
+- sinon, convertit la valeur semaine en lundi via `weekInputToMonday` et appelle `grille_duplicate_week`
+
+### `applyDupResult(data, largeDataset)`
+
+Applique le résultat d'une duplication au calendrier et à `GrilleData.slots` :
+- supprime les events dont le `postId` est dans `data.deletedPostIds`
+- ajoute les nouveaux events ; si `largeDataset = true` (duplication année), n'ajoute au calendrier
+  que les events dans la plage visible (`calendar.view.currentStart/currentEnd`)
 
 ---
 
-#### `grille_save_slot`
+## 4. Handlers AJAX (`class-grille-ajax.php`)
 
-Crée ou met à jour un post `grille_slot`.
+6 actions. Toutes protégées par `check_ajax_referer('grille_nonce', 'nonce')` + `current_user_can('edit_posts')`.
 
-**Paramètres POST :** `emissionId`, `weekday`, `heureDebut`, `heureFin`, `postId` (vide = création)
+```php
+add_action('wp_ajax_grille_save_slot',           [$this, 'save_slot']);
+add_action('wp_ajax_grille_update_slot',         [$this, 'update_slot']);
+add_action('wp_ajax_grille_delete_slot',         [$this, 'delete_slot']);
+add_action('wp_ajax_grille_duplicate_day',       [$this, 'duplicate_day']);
+add_action('wp_ajax_grille_duplicate_week',      [$this, 'duplicate_week']);
+add_action('wp_ajax_grille_duplicate_week_year', [$this, 'duplicate_week_to_year']);
+```
 
-**Validation (rejeter avec `wp_send_json_error` si invalide) :**
-- `weekday` ∈ `[0, 6]` (entier)
-- `heureDebut` et `heureFin` correspondent à `/^\d{2}:\d{2}$/`
+### `grille_save_slot`
+
+**POST :** `emissionId`, `date` (YYYY-MM-DD), `heureDebut`, `heureFin`, `postId` (vide = création)
+
+**Validation :**
+- `date` : regex `/^\d{4}-\d{2}-\d{2}$/` + round-trip `DateTime::createFromFormat`
+- `heureDebut` / `heureFin` : regex `/^\d{2}:\d{2}$/`
 - `heureFin` > `heureDebut`
-- `emissionId` est un post de type `emission` avec status `publish`
-
-**Logique :**
-```php
-// Création
-$post_id = wp_insert_post([
-    'post_type'   => 'grille_slot',
-    'post_status' => 'publish',
-    'post_title'  => sanitize_text_field($emission->post_title),
-]);
-
-// Mise à jour (si postId fourni et valide)
-wp_update_post(['ID' => $post_id, 'post_title' => $emission->post_title]);
-
-// Champs meta
-update_post_meta($post_id, 'weekday',     (int) $weekday);
-update_post_meta($post_id, 'heure_debut', sanitize_text_field($heure_debut));
-update_post_meta($post_id, 'heure_fin',   sanitize_text_field($heure_fin));
-update_post_meta($post_id, 'emission_id', (int) $emission_id);
-```
+- `emissionId` est un post `emission` publié
 
 **Retourne :**
 ```json
-{
-    "postId":     7,
-    "weekday":    1,
-    "heureDebut": "08:00",
-    "heureFin":   "09:00",
-    "emissionId": 42
-}
+{ "postId": 7, "date": "2026-05-04", "heureDebut": "08:00", "heureFin": "09:00", "emissionId": 42 }
 ```
 
----
+### `grille_update_slot`
 
-#### `grille_update_slot`
+**POST :** `postId`, `date`, `heureDebut`, `heureFin`
 
-Mise à jour partielle (drag & drop / resize). Pas de changement d'émission.
+Mise à jour silencieuse (drag & drop / resize). Inclut `date` car un drag peut changer le jour.
+Retourne `{ "success": true }`.
 
-**Paramètres POST :** `postId`, `weekday`, `heureDebut`, `heureFin`
+### `grille_delete_slot`
 
-**Validation :** identique à `grille_save_slot` (sauf `emissionId`).
-Vérifier que le post existe et est de type `grille_slot`.
+**POST :** `postId`
 
-**Retourne :** `{ "success": true }`
+`wp_delete_post($post_id, true)` (suppression définitive).
 
----
+### `grille_duplicate_day`
 
-#### `grille_delete_slot`
+**POST :** `sourceDate` (YYYY-MM-DD), `targetDates[]`, `replaceExisting` (0/1)
 
-**Paramètres POST :** `postId`
+Copie tous les slots de `sourceDate` vers chaque date dans `targetDates`. Si `replaceExisting = 1`,
+supprime d'abord les slots existants sur chaque date cible.
 
-**Logique :**
+**Retourne :** `{ "deletedPostIds": [...], "created": [...] }`
+
+Chaque entrée de `created` : `{ postId, id, date, heureDebut, heureFin, emissionId }`.
+
+### `grille_duplicate_week`
+
+**POST :** `sourceWeekStart` (lundi YYYY-MM-DD), `targetWeekStarts[]`, `replaceExisting`
+
+Délègue à `do_duplicate_week()`.
+
+### `grille_duplicate_week_year`
+
+**POST :** `sourceWeekStart`, `year`, `replaceExisting`
+
+`set_time_limit(300)`. Calcule tous les lundis de l'année via `get_year_mondays($year, $exclude)`.
+Délègue à `do_duplicate_week()`.
+
+### `do_duplicate_week()` (helper privé)
+
 ```php
-$post = get_post((int) $post_id);
-if (!$post || $post->post_type !== 'grille_slot') {
-    wp_send_json_error('Créneau introuvable.');
+private function do_duplicate_week(string $source_week_start, array $target_week_starts, bool $replace): array {
+    $source_sunday = (new DateTime($source_week_start))->modify('+6 days')->format('Y-m-d');
+    // Charge les slots source (BETWEEN DATE)
+    // Pour chaque semaine cible :
+    //   $offset_days = (int) round(($target_ts - $source_ts) / DAY_IN_SECONDS);
+    //   $new_date    = date('Y-m-d', strtotime($data['date']) + $offset_days * DAY_IN_SECONDS);
 }
-wp_delete_post((int) $post_id, true); // true = suppression définitive
-wp_send_json_success();
 ```
-
-**Retourne :** `{ "success": true }`
 
 ---
 
-### 5. Exposition WPGraphQL (`class-grille-graphql.php`)
+## 5. Exposition WPGraphQL (`class-grille-graphql.php`)
 
-Hook d'enregistrement : `graphql_register_types`.
+Hook : `graphql_register_types`.
 
-#### Champs sur le type `GrilleSlot`
+### Champs sur `GrilleSlot`
 
 ```php
 register_graphql_fields('GrilleSlot', [
-    'weekday' => [
-        'type'        => 'Int',
-        'description' => 'Jour de la semaine (0=dimanche, 1=lundi, …, 6=samedi)',
-        'resolve'     => function($post) {
-            return (int) get_post_meta($post->ID, 'weekday', true);
-        },
-    ],
-    'heureDebut' => [
-        'type'        => 'String',
-        'description' => 'Heure de début au format HH:MM',
-        'resolve'     => function($post) {
-            return get_post_meta($post->ID, 'heure_debut', true) ?: null;
-        },
-    ],
-    'heureFin' => [
-        'type'        => 'String',
-        'description' => 'Heure de fin au format HH:MM',
-        'resolve'     => function($post) {
-            return get_post_meta($post->ID, 'heure_fin', true) ?: null;
-        },
-    ],
-    'emission' => [
-        'type'        => 'Emission',
-        'description' => 'Émission associée à ce créneau',
-        'resolve'     => function($post) {
-            $emission_id = (int) get_post_meta($post->ID, 'emission_id', true);
-            if (!$emission_id) return null;
-            $emission = get_post($emission_id);
-            if (!$emission || $emission->post_status !== 'publish') return null;
-            return $emission;
-        },
-    ],
+    'date'       => ['type' => 'String', 'resolve' => fn($post) => get_post_meta($post->ID, 'date', true) ?: null],
+    'heureDebut' => ['type' => 'String', 'resolve' => fn($post) => get_post_meta($post->ID, 'heure_debut', true) ?: null],
+    'heureFin'   => ['type' => 'String', 'resolve' => fn($post) => get_post_meta($post->ID, 'heure_fin', true) ?: null],
+    'emission'   => ['type' => 'Emission', 'resolve' => ...],
 ]);
 ```
 
-#### Query racine `grilleSlots`
+### Query `grilleSlots`
 
 ```php
 register_graphql_field('RootQuery', 'grilleSlots', [
-    'type'        => ['list_of' => 'GrilleSlot'],
-    'description' => 'Créneaux de la grille hebdomadaire, optionnellement filtrés par jour.',
-    'args'        => [
-        'weekday' => [
-            'type'        => 'Int',
-            'description' => 'Filtrer par jour (0=dimanche … 6=samedi)',
-        ],
+    'type' => ['list_of' => 'GrilleSlot'],
+    'args' => [
+        'dateDebut' => ['type' => 'String'],  // YYYY-MM-DD incluse
+        'dateFin'   => ['type' => 'String'],  // YYYY-MM-DD incluse
     ],
     'resolve' => function($root, $args) {
-        $query_args = [
-            'post_type'      => 'grille_slot',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'orderby'        => 'meta_value_num',
-            'meta_key'       => 'weekday',
-            'order'          => 'ASC',
-        ];
-
-        if (isset($args['weekday'])) {
-            $query_args['meta_query'] = [[
-                'key'     => 'weekday',
-                'value'   => (int) $args['weekday'],
-                'compare' => '=',
-                'type'    => 'NUMERIC',
-            ]];
-        }
-
-        return get_posts($query_args) ?: [];
+        // meta_query BETWEEN DATE si args fournis
     },
 ]);
 ```
 
-**Queries GraphQL disponibles côté Next.js :**
+**Queries GraphQL côté Next.js :**
 
 ```graphql
-# Tous les créneaux
-query GetGrille {
-    grilleSlots {
+# Tous les créneaux d'une semaine
+query GetGrilleWeek {
+    grilleSlots(dateDebut: "2026-05-04", dateFin: "2026-05-10") {
         id
-        weekday
+        date
         heureDebut
         heureFin
         emission {
@@ -793,11 +532,11 @@ query GetGrille {
     }
 }
 
-# Créneaux d'un jour précis
-query GetGrilleJour {
-    grilleSlots(weekday: 1) {
+# Tous les créneaux (sans filtre)
+query GetGrille {
+    grilleSlots {
         id
-        weekday
+        date
         heureDebut
         heureFin
         emission { title uri }
@@ -809,38 +548,41 @@ query GetGrilleJour {
 
 ## Ce qu'il ne faut pas faire
 
+- **Ne pas utiliser `daysOfWeek` + `startTime` + `endTime`** pour les events FullCalendar — ce format récurrent ferait apparaître chaque créneau sur toutes les semaines.
+- **Ne pas utiliser `toISOString().slice(0, 10)`** pour extraire une date — utiliser `getFullYear/getMonth/getDate` (heure locale) via le helper `getDateStr()`.
+- **Ne pas stocker `weekday` en base** — stocker `date` (YYYY-MM-DD) dans le meta `date`.
 - **Ne pas utiliser ACF** pour les champs du créneau — `register_post_meta()` natif uniquement.
-- **Ne pas utiliser `add_submenu_page`** — créer un `add_menu_page` de premier niveau.
 - **Ne pas afficher le CPT dans les listes admin** (`show_ui: false`, `show_in_nav_menus: false`).
 - **Ne pas exposer le CPT via l'API REST** (`show_in_rest: false`).
-- **Ne pas charger FullCalendar sur toutes les pages admin** — vérifier strictement `$hook === 'toplevel_page_hope-radio-grille'` dans `admin_enqueue_scripts`.
-- **Ne pas utiliser l'ancien bundle jQuery de FullCalendar** (v3) — utiliser exclusivement le standard bundle v6 via CDN jsdelivr.
-- **Ne pas utiliser `date` ou `start`/`end` ISO pour les events récurrents** — utiliser `daysOfWeek` + `startTime` + `endTime` (format FullCalendar recurring).
-- **Ne pas stocker `weekday` en string** (`"lundi"`) en base de données — stocker l'entier `0-6` via `update_post_meta`.
-- **Ne pas créer de table SQL custom** — utiliser le CPT + post meta WordPress standard.
+- **Ne pas charger FullCalendar sur toutes les pages admin** — vérifier `$hook === 'toplevel_page_hope-radio-grille'`.
+- **Ne pas utiliser l'ancien bundle jQuery de FullCalendar** (v3).
+- **Ne pas créer de table SQL custom** — utiliser CPT + post meta.
 - **Ne pas modifier `functions.php`** au-delà d'un seul `require_once` vers `grille/grille.php`.
-- **Ne pas écrire de styles dans `style.css`** du thème — uniquement dans `grille/assets/css/grille-admin.css`.
-- **Ne pas oublier `wp_die()` après `wp_send_json_success()` / `wp_send_json_error()`** dans les handlers AJAX (requis par WordPress — bien que `wp_send_json_*` appelle déjà `die()` internement depuis WP 4.7, le mentionner évite les doutes).
-- **Ne pas appeler `calendar.render()` avant que le DOM soit prêt** — toujours dans `DOMContentLoaded`.
-- **Ne pas utiliser `jQuery.ajax`** pour les requêtes AJAX — utiliser l'API `fetch` native (WordPress admin l'embarque depuis IE11 est abandonné).
-- **Ne pas gérer les chevauchements sans `eventOverlap: false`** — la radio ne peut pas diffuser deux émissions simultanément sur le même créneau.
+- **Ne pas gérer les chevauchements sans `eventOverlap: false`** — deux émissions ne peuvent pas se superposer.
+- **Ne pas omettre `set_time_limit(300)`** dans `duplicate_week_to_year` — la duplication vers 52 semaines peut dépasser le timeout par défaut.
 
 ---
 
 ## Critères de validation
 
 - [ ] La page "Grille" apparaît dans le menu admin WordPress avec l'icône `dashicons-schedule`
-- [ ] FullCalendar s'affiche en vue `timeGridWeek` sans navigation de date (`headerToolbar: false`)
-- [ ] Les créneaux existants sont chargés et visibles au rendu initial
-- [ ] Dessiner une plage vide ouvre le modal avec `weekday` et horaires pré-remplis
+- [ ] FullCalendar s'affiche en vue `timeGridWeek` avec navigation prev/next/today
+- [ ] Les créneaux de l'année en cours sont chargés et visibles au rendu initial
+- [ ] Dessiner une plage ouvre le modal avec la date et les horaires pré-remplis
 - [ ] Le select "Émission" liste tous les posts `emission` publiés
-- [ ] Enregistrer un créneau l'ajoute au calendrier sans rechargement de page (via `calendar.addEvent`)
-- [ ] Modifier une émission dans le modal met à jour l'event existant (remove + addEvent)
-- [ ] Drag & drop sauvegarde silencieusement et annule le déplacement si l'AJAX échoue (`info.revert()`)
-- [ ] Resize sauvegarde silencieusement et annule le resize si l'AJAX échoue (`info.revert()`)
-- [ ] Clic sur un créneau ouvre le modal en mode édition avec toutes les données pré-remplies
-- [ ] Supprimer un créneau le retire du calendrier (`event.remove()`) et le supprime en base
+- [ ] Enregistrer un créneau l'ajoute au calendrier sans rechargement de page
+- [ ] Modifier un créneau met à jour l'event existant
+- [ ] Drag & drop sauvegarde silencieusement (avec mise à jour de la `date`) et annule si AJAX échoue
+- [ ] Resize sauvegarde silencieusement et annule si AJAX échoue
+- [ ] Supprimer un créneau le retire du calendrier et le supprime en base
 - [ ] Deux créneaux ne peuvent pas se chevaucher (`eventOverlap: false`)
-- [ ] La query GraphQL `grilleSlots` retourne tous les créneaux avec l'objet `emission` résolu
-- [ ] La query `grilleSlots(weekday: 1)` filtre correctement sur le lundi
+- [ ] Bouton `⧉` dans chaque en-tête de colonne → modal de duplication du jour
+- [ ] La checkbox "Toute la semaine" sélectionne tous les jours cibles
+- [ ] La duplication de jour avec "Remplacer" supprime d'abord les créneaux existants
+- [ ] Bouton "⧉ Dupliquer la semaine" dans le toolbar → modal de duplication de semaine
+- [ ] `input[type=week]` pré-rempli avec la semaine suivante
+- [ ] La checkbox "Toutes les semaines de [année]" désactive l'input semaine et duplique vers toute l'année
+- [ ] La duplication vers toute l'année n'ajoute au calendrier que les events de la semaine visible
+- [ ] La query GraphQL `grilleSlots` retourne les créneaux avec l'objet `emission` résolu
+- [ ] `grilleSlots(dateDebut: "...", dateFin: "...")` filtre correctement par plage de dates
 - [ ] Aucun asset FullCalendar n'est chargé sur les autres pages admin
