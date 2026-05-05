@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
+import Image from 'next/image';
 import Link from 'next/link';
 
 import type { EmissionSlot } from '@/app/data';
@@ -38,16 +39,12 @@ function EmissionCard({ slot }: { slot: EmissionSlot }) {
         }}
       >
         {slot.image.url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={slot.image.url}
             alt={slot.image.alt}
-            style={{
-              width:      '100%',
-              height:     '100%',
-              objectFit:  'cover',
-              display:    'block',
-            }}
+            fill
+            style={{ objectFit: 'cover' }}
+            sizes="(max-width: 767px) 100vw, (max-width: 986px) 50vw, 33vw"
           />
         ) : (
           <div style={{ width: '100%', height: '100%', background: '#4a0030' }} />
