@@ -24,3 +24,8 @@ export type { ActualiteCard }                 from './actualites/transformer';
 export { MOCK_GRILLE_SLOTS }                  from './grille/mock-grille';
 export { transformGrilleSlots }               from './grille/transformer';
 export type { EmissionSlot }                  from './grille/transformer';
+
+// Bannières
+export { MOCK_BANNIERES }                     from './bannieres/mock-bannieres';
+export { transformBannieres }                 from './bannieres/transformer';
+export type { BanniereCard }                  from './bannieres/transformer';

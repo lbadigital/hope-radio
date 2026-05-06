@@ -1,13 +1,38 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
     remotePatterns: [
-      new URL('https://api-radio.lba-digital.fr/**'),
-      new URL('http://hoperadiofrance.fr/**'),
-      new URL('http://localhost:8080/**'),
-    ],
+      {
+        protocol: 'https',
+        hostname: 'api-radio.lba-digital.fr',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'hoperadiofrance.fr',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'wordpress',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+        pathname: '/**',
+      },
+    ]
+  },
+  images: {
+    unoptimized: true,
   }
 };
 
