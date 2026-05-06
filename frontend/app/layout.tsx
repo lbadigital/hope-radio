@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Archivo } from "next/font/google";
 import "./globals.css";
+/* import "swiper/css";
+import "swiper/css/effect-fade";
+import "swiper/css/pagination";*/
 import Header from "@/components/layout/Header";
 import RadioPlayer from "@/components/player/RadioPlayer";
 

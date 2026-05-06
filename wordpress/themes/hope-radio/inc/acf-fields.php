@@ -4,6 +4,17 @@ if (!function_exists('acf_add_local_field_group')) {
     return;
 }
 
+// ── Page d'options du thème ───────────────────────────────────────────────────
+if (function_exists('acf_add_options_page')) {
+    acf_add_options_page([
+        'page_title' => 'Options du thème',
+        'menu_title' => 'Options',
+        'menu_slug'  => 'theme-options',
+        'capability' => 'edit_posts',
+        'redirect'   => false,
+    ]);
+}
+
 acf_add_local_field_group([
     'key'      => 'group_emission',
     'title'    => "Informations de l'émission",
@@ -220,6 +231,83 @@ acf_add_local_field_group([
     ],
 ]);
 
+// ── Promotions (bannières — option de thème) ─────────────────────────────────
+//
+// Les bannières sont gérées comme option de thème (non liées à un CPT).
+// L'exposition GraphQL est faite manuellement via register_graphql_field
+// car WPGraphQL for ACF ne supporte pas nativement les options pages avec
+// des répéteurs complexes.
+
+acf_add_local_field_group([
+    'key'      => 'group_promotions',
+    'title'    => 'Promotions',
+    'fields'   => [
+        [
+            'key'   => 'field_tab_promotions',
+            'label' => 'Promotions',
+            'type'  => 'tab',
+        ],
+        [
+            'key'        => 'field_bannieres',
+            'label'      => 'Bannières',
+            'name'       => 'bannieres',
+            'type'       => 'repeater',
+            'layout'     => 'block',
+            'sub_fields' => [
+                [
+                    'key'      => 'field_banniere_titre',
+                    'label'    => 'Titre',
+                    'name'     => 'titre',
+                    'type'     => 'text',
+                    'required' => 1,
+                ],
+                [
+                    'key'   => 'field_banniere_sous_titre',
+                    'label' => 'Sous titre',
+                    'name'  => 'sous_titre',
+                    'type'  => 'text',
+                ],
+                [
+                    'key'        => 'field_banniere_images',
+                    'label'      => 'Images de fond',
+                    'name'       => 'images',
+                    'type'       => 'group',
+                    'layout'     => 'block',
+                    'sub_fields' => [
+                        [
+                            'key'           => 'field_banniere_image_desktop',
+                            'label'         => 'Desktop',
+                            'name'          => 'desktop',
+                            'type'          => 'image',
+                            'return_format' => 'array',
+                            'preview_size'  => 'medium',
+                            'required'      => 1,
+                        ],
+                        [
+                            'key'           => 'field_banniere_image_mobile',
+                            'label'         => 'Mobile (optionnel)',
+                            'name'          => 'mobile',
+                            'type'          => 'image',
+                            'return_format' => 'array',
+                            'preview_size'  => 'medium',
+                            'required'      => 0,
+                        ],
+                    ],
+                ],
+                [
+                    'key'   => 'field_banniere_lien',
+                    'label' => 'Lien',
+                    'name'  => 'lien',
+                    'type'  => 'url',
+                ],
+            ],
+        ],
+    ],
+    'location' => [
+        [['param' => 'options_page', 'operator' => '==', 'value' => 'theme-options']],
+    ],
+]);
+
 // WPGraphQL for ACF ne sait pas résoudre les champs sur MenuItem.
 // On enregistre les champs directement via l'API WPGraphQL avec un resolver explicite.
 add_action('graphql_register_types', function () {
@@ -251,6 +339,60 @@ add_action('graphql_register_types', function () {
                 'sourceUrl' => $image['url'] ?? null,
                 'altText'   => $image['alt'] ?? null,
             ];
+        },
+    ]);
+});
+
+// Expose les bannières promotionnelles via WPGraphQL.
+// Le resolver lit get_field('bannieres', 'option') et mappe chaque item
+// du répéteur ACF vers le type BanniereItem.
+add_action('graphql_register_types', function () {
+    register_graphql_object_type('BanniereImage', [
+        'description' => 'Image de bannière avec URL et texte alternatif',
+        'fields'      => [
+            'sourceUrl' => ['type' => 'String'],
+            'altText'   => ['type' => 'String'],
+        ],
+    ]);
+
+    register_graphql_object_type('BanniereImages', [
+        'description' => 'Images de fond de la bannière (desktop + mobile optionnel)',
+        'fields'      => [
+            'desktop' => ['type' => 'BanniereImage'],
+            'mobile'  => ['type' => 'BanniereImage'],
+        ],
+    ]);
+
+    register_graphql_object_type('BanniereItem', [
+        'description' => 'Élément de bannière promotionnelle',
+        'fields'      => [
+            'titre'     => ['type' => 'String'],
+            'sousTitre' => ['type' => 'String'],
+            'images'    => ['type' => 'BanniereImages'],
+            'lien'      => ['type' => 'String'],
+        ],
+    ]);
+
+    register_graphql_field('RootQuery', 'bannieres', [
+        'type'        => ['list_of' => 'BanniereItem'],
+        'description' => 'Liste des bannières promotionnelles gérées via Options du thème',
+        'resolve'     => function () {
+            $rows = get_field('bannieres', 'option');
+            if (empty($rows) || !is_array($rows)) return [];
+
+            return array_map(function ($row) {
+                $desktop = $row['images']['desktop'] ?? null;
+                $mobile  = $row['images']['mobile']  ?? null;
+                return [
+                    'titre'     => $row['titre']      ?? null,
+                    'sousTitre' => $row['sous_titre']  ?? null,
+                    'images'    => [
+                        'desktop' => $desktop ? ['sourceUrl' => $desktop['url'] ?? null, 'altText' => $desktop['alt'] ?? ''] : null,
+                        'mobile'  => $mobile  ? ['sourceUrl' => $mobile['url']  ?? null, 'altText' => $mobile['alt']  ?? ''] : null,
+                    ],
+                    'lien'      => $row['lien'] ?? null,
+                ];
+            }, $rows);
         },
     ]);
 });

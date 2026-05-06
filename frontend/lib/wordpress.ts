@@ -22,6 +22,31 @@ export function normalizeMenuUrl(url: string): string {
   }
 }
 
+/**
+ * Remplace le host de l'URL WordPress par le host interne Docker défini dans
+ * NEXT_PUBLIC_WORDPRESS_URL. Nécessaire pour que /_next/image puisse fetcher
+ * les images depuis le container Next.js (localhost:8080 n'est pas joignable
+ * depuis l'intérieur du réseau Docker).
+ *
+ * En production, si l'URL WordPress est déjà sur le bon host, elle reste inchangée.
+ */
+export function normalizeWpImageUrl(url: string): string {
+  if (!url) return url;
+  const internalUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL ?? '';
+  if (!internalUrl) return url;
+  try {
+    const parsed   = new URL(url);
+    const internal = new URL(internalUrl);
+    if (parsed.hostname === internal.hostname) return url;
+    parsed.protocol = internal.protocol;
+    parsed.hostname = internal.hostname;
+    parsed.port     = internal.port;
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 export function isExternalUrl(url: string): boolean {
   if (!url || url.startsWith('/') || url.startsWith('#')) return false;
   try {
