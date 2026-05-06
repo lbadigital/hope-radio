@@ -7,7 +7,7 @@ import 'swiper/css/effect-fade';
 import 'swiper/css/pagination';
 import Link from 'next/link';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { EffectFade, Pagination } from 'swiper/modules';
+import { EffectFade, Pagination, Autoplay } from 'swiper/modules';
 
 import { isExternalUrl } from '@/lib/wordpress';
 import type { BanniereCard } from '@/app/data';
@@ -90,11 +90,12 @@ export default function BanniereSlider({ bannieres }: BanniereSliderProps) {
       `}</style>
 
       <Swiper
-        modules={[EffectFade, Pagination]}
+        modules={[EffectFade, Pagination, Autoplay]}
         effect="fade"
         fadeEffect={{ crossFade: true }}
         slidesPerView={1}
         loop
+        autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }}
         pagination={{ clickable: true }}
         className="banniere-slider"
       >
