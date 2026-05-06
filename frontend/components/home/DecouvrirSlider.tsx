@@ -19,121 +19,39 @@ function EmissionCard({ slot }: { slot: EmissionSlot }) {
   return (
     <Link
       href={slot.uri}
-      style={{
-        display:         'flex',
-        flexDirection:   'column',
-        textDecoration:  'none',
-        color:           'inherit',
-        cursor:          'pointer',
-        borderRadius:    '8px',
-        overflow:        'hidden',
-      }}
+      className="flex flex-col no-underline text-inherit cursor-pointer rounded-lg overflow-hidden"
     >
       {/* Image + overlay */}
-      <div
-        style={{
-          position:      'relative',
-          width:         '100%',
-          height:        '234px',
-          flexShrink:    0,
-        }}
-      >
+      <div className="relative w-full h-[234px] shrink-0">
         {slot.image.url ? (
           <Image
             src={slot.image.url}
             alt={slot.image.alt}
             fill
-            style={{ objectFit: 'cover' }}
+            className="object-cover"
             sizes="(max-width: 767px) 100vw, (max-width: 986px) 50vw, 33vw"
           />
         ) : (
-          <div style={{ width: '100%', height: '100%', background: '#4a0030' }} />
+          <div className="w-full h-full bg-[#4a0030]" />
         )}
 
         {/* Dégradé sombre bas → haut pour lisibilité du texte */}
-        <div
-          style={{
-            position:   'absolute',
-            inset:      0,
-            background: '#000000',
-          }}
-        />
+        <div className="absolute inset-0 bg-black" />
 
-        {/* Bloc horaires — haut gauche */}
-        <div
-          style={{
-            position:      'absolute',
-            top:           0,
-            right:          18,
-            display:       'flex',
-            padding:       '15px 20px',
-            alignItems:    'flex-start',
-            gap:           '10px',
-            flex:          '1 0 0',
-            background:    '#720049',
-            borderBottomLeftRadius: '8px',
-            borderBottomRightRadius: '8px',
-          }}
-        >
-          <span
-            style={{
-              color:      '#FFF',
-              textAlign:  'center',
-              fontFamily: 'var(--font-nav)',
-              fontSize:   '28px',
-              fontStyle:  'normal',
-              fontWeight: 900,
-              lineHeight: '110%',
-              whiteSpace: 'pre-line',
-            }}
-          >
+        {/* Bloc horaires — haut droite */}
+        <div className="absolute top-0 right-[18px] flex py-[15px] px-5 items-start gap-[10px] flex-[1_0_0] bg-primary rounded-b-lg">
+          <span className="text-white text-center font-nav text-[28px] not-italic font-[900] leading-[110%] whitespace-pre-line">
             {slot.heureDebut}{'\n'}{slot.heureFin}
           </span>
         </div>
 
         {/* Titre + catégorie — bas gauche */}
-        <div
-          style={{
-            position:      'absolute',
-            bottom:        0,
-            left:          0,
-            right:         0,
-            padding:       '0 18px 19px 30px',
-            display:       'flex',
-            flexDirection: 'column',
-            alignItems:    'flex-end',
-            gap:           '1px',
-          }}
-        >
-          
-          <p
-            style={{
-              alignSelf:     'flex-start',
-              color:         '#FFF',
-              fontFamily:    'var(--font-heading)',
-              fontSize:      '20px',
-              fontStyle:     'normal',
-              fontWeight:    700,
-              lineHeight:    '110%',
-              margin:        0,
-              textTransform: 'uppercase',
-            }}
-          >
+        <div className="absolute bottom-0 left-0 right-0 pt-0 pr-[18px] pb-[19px] pl-[30px] flex flex-col items-end gap-px">
+          <p className="self-start text-white font-heading text-xl not-italic font-bold leading-[110%] m-0 uppercase">
             {slot.title}
           </p>
           {slot.category && (
-            <span
-              style={{
-                alignSelf:     'flex-start',
-                color:         '#E45612',
-                fontFamily:    'var(--font-heading)',
-                fontSize:      '14px',
-                fontStyle:     'normal',
-                fontWeight:    700,
-                lineHeight:    '124%',
-                textTransform: 'uppercase',
-              }}
-            >
+            <span className="self-start text-secondary font-heading text-sm not-italic font-bold leading-[124%] uppercase">
               {slot.category}
             </span>
           )}

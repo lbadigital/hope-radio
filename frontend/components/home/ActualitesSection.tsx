@@ -19,74 +19,29 @@ function ActualiteCardDesktop({
   return (
     <Link
       href={card.uri}
-      className="actualite-card"
-      style={{
-        // Card unique : dimensions fixes. Plusieurs cards : flex égal.
-        ...(isSingle
-          ? { width: '372px', flexShrink: 0 }
-          : { flex: '1 1 0' }),
-        display:        'flex',
-        flexDirection:  'column',
-        gap:            '8px',
-        textDecoration: 'none',
-        color:          'inherit',
-      }}
+      className={`actualite-card group flex flex-col gap-2 no-underline text-inherit${isSingle ? ' w-[372px] shrink-0' : ' flex-[1_1_0]'}`}
     >
       {/* Thumbnail */}
       <div
-        style={{
-          width:        isSingle ? '372px' : '100%',
-          height:       isSingle ? '190px' : 'auto',
-          aspectRatio:  '186/95',
-          overflow:     'hidden',
-          flexShrink:   0,
-          borderRadius: '1rem',
-        }}
+        className={`aspect-[186/95] overflow-hidden shrink-0 rounded-2xl${isSingle ? ' w-[372px] h-[190px]' : ' w-full h-auto'}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={card.image.url}
           alt={card.image.alt}
-          className="actualite-card__image"
-          style={{
-            width:      '100%',
-            height:     '100%',
-            objectFit:  'cover',
-            display:    'block',
-            transform:  'scale(1.05)',
-            transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          }}
+          className="actualite-card__image w-full h-full object-cover block scale-105 transition-transform duration-[400ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-100"
         />
       </div>
 
       {/* Catégorie */}
       {card.category && (
-        <span
-          style={{
-            color:         '#E85B21',
-            fontFamily:    'var(--font-heading)',
-            fontSize:      '12px',
-            fontWeight:    700,
-            lineHeight:    '22px',
-            textTransform: 'uppercase',
-          }}
-        >
+        <span className="text-[#E85B21] font-heading text-xs font-bold leading-[22px] uppercase">
           {card.category}
         </span>
       )}
 
       {/* Excerpt */}
-      <p
-        style={{
-          color:         '#000',
-          fontFamily:    'var(--font-heading)',
-          fontSize:      '16px',
-          fontWeight:    700,
-          lineHeight:    '22px',
-          textTransform: 'uppercase',
-          margin:        0,
-        }}
-      >
+      <p className="text-black font-heading text-base font-bold leading-[22px] uppercase m-0">
         {card.excerpt || card.title}
       </p>
     </Link>
@@ -125,28 +80,12 @@ export default async function ActualitesSection({
   const isSingle = cards.length === 1;
 
   return (
-    <section className="actualites-section">
+    <section className="actualites-section w-full py-12">
       {/*
         Styles hover (image scale) + pagination Swiper custom
         injectés une seule fois dans la section.
       */}
       <style>{`
-        .actualites-section {
-          width: 100%;
-          padding: 48px 0;
-        }
-
-        .container {
-          max-width: 1139px;
-          margin: 0 auto;
-          padding: 0 32px;
-          width: 100%;
-        }
-
-        .actualite-card:hover .actualite-card__image {
-          transform: scale(1) !important;
-        }
-
         /* Pagination — même style pill que HeroSlider, couleur primaire */
         .actualites-slider .swiper-pagination {
           position:        relative;
@@ -170,89 +109,34 @@ export default async function ActualitesSection({
           background:    #72004A;
           border-radius: 100px;
         }
-
-        /* Desktop : grille visible, slider caché, lien dans le header */
-        @media (min-width: 987px) {
-          .actualites-grid-desktop   { display: flex  !important; }
-          .actualites-slider-wrapper { display: none  !important; }
-          .actualites-link-desktop   { display: flex  !important; }
-        }
-        /* Mobile + tablette : grille cachée, slider visible, lien caché du header */
-        @media (max-width: 986px) {
-          .actualites-grid-desktop   { display: none  !important; }
-          .actualites-slider-wrapper { display: block !important; }
-          .actualites-link-desktop   { display: none  !important; }
-        }
       `}</style>
 
       <div className="container">
 
         {/* ── En-tête du bloc ── */}
-        <div
-          style={{
-            display:        'flex',
-            justifyContent: 'space-between',
-            alignItems:     'center',
-            marginBottom:   '32px',
-          }}
-        >
-          <h2
-            style={{
-              display:        'flex',
-              width:          '625px',
-              height:         '59px',
-              flexDirection:  'column',
-              justifyContent: 'center',
-              fontFamily:     'var(--font-nav)',
-              fontWeight:     900,
-              fontSize:       '48px',
-              lineHeight:     '1',
-              textTransform:  'uppercase',
-              margin:         0,
-            }}
-          >
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="flex w-[625px] h-[59px] flex-col justify-center font-nav font-[900] text-[48px] leading-none uppercase m-0">
             {title}
           </h2>
 
           {/* Lien desktop — masqué en dessous de 986px */}
           <Link
             href="/actualites"
-            className="actualites-link-desktop"
-            style={{
-              display:        'flex',
-              width:          '205px',
-              height:         '31px',
-              flexDirection:  'column',
-              justifyContent: 'center',
-              textAlign:      'right',
-              fontFamily:     'var(--font-heading)',
-              fontSize:       '14px',
-              fontWeight:     700,
-              textTransform:  'uppercase',
-              textDecoration: 'underline',
-              color:          '#000',
-            }}
+            className="hidden min-[987px]:flex w-[205px] h-[31px] flex-col justify-center text-right font-heading text-sm font-bold uppercase underline text-black"
           >
             Toutes les actualités
           </Link>
         </div>
 
         {/* ── Grille desktop (> 986px) ── */}
-        <div
-          className="actualites-grid-desktop"
-          style={{
-            display:   'flex',
-            gap:       '30px',
-            alignItems: 'flex-start',
-          }}
-        >
+        <div className="hidden min-[987px]:flex gap-[30px] items-start">
           {cards.map((card) => (
             <ActualiteCardDesktop key={card.uri} card={card} isSingle={isSingle} />
           ))}
         </div>
 
         {/* ── Slider mobile + tablette (≤ 986px) ── */}
-        <div className="actualites-slider-wrapper">
+        <div className="block min-[987px]:hidden">
           <ActualitesSlider cards={cards} />
         </div>
 

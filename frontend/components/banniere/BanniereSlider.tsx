@@ -16,20 +16,7 @@ interface BanniereSliderProps {
   bannieres: BanniereCard[];
 }
 
-const BUTTON_STYLE: React.CSSProperties = {
-  display:         'inline-flex',
-  alignItems:      'center',
-  justifyContent:  'center',
-  borderRadius:    '30px',
-  backgroundColor: '#FFF',
-  color:           'var(--color-primary)',
-  fontSize:        '16px',
-  fontWeight:      600,
-  height:          '50px',
-  padding:         '10px 30px',
-  whiteSpace:      'nowrap',
-  textDecoration:  'none',
-};
+const BUTTON_CN = 'font-button font-semibold inline-flex items-center justify-center rounded-[30px] bg-white text-primary text-base h-[50px] px-[30px] py-[10px] whitespace-nowrap no-underline';
 
 export default function BanniereSlider({ bannieres }: BanniereSliderProps) {
   const [isMobile, setIsMobile] = useState(false);
@@ -50,7 +37,7 @@ export default function BanniereSlider({ bannieres }: BanniereSliderProps) {
         .banniere-slider {
           width: 100%;
           height: 100%;
-        
+
         }
         .banniere-slider .swiper-pagination {
           display: flex;
@@ -111,32 +98,23 @@ export default function BanniereSlider({ bannieres }: BanniereSliderProps) {
                   src={img.url}
                   alt={img.alt}
                   fill
-                  style={{ objectFit: 'cover', objectPosition: 'center' }}
+                  className="object-cover object-center hidden lg:block absolute top-0 left-0 w-full h-full"
                   priority={index === 0}
-                  className="hidden lg:block absolute top-0 left-0 w-full h-full"
                 />
-
 
                 {/* Contenu */}
                 <div className="z-50 relative inset-0 flex flex-col h-full gap-4 px-[60px] pb-8 justify-between max-[768px]:px-5 max-[768px]:pb-8">
                   {/* Sous-titre */}
                   <div>
-                    <span
-                        className="font-heading max-[768px]:text-center"
-                        style={{ color: '#FFF', fontSize: '14px', fontWeight: 700, lineHeight: '124%' }}
-                    >
-                    {banniere.sousTitre}
-                  </span>
+                    <span className="font-heading max-[768px]:text-center text-white text-sm font-bold leading-[124%]">
+                      {banniere.sousTitre}
+                    </span>
 
                     {/* Titre */}
-                    <h2
-                        className="font-nav text-[88px] max-[768px]:text-[48px] max-[768px]:text-center"
-                        style={{ color: '#FFF', fontWeight: 900 }}
-                    >
+                    <h2 className="font-nav text-[88px] max-[768px]:text-[48px] max-[768px]:text-center text-white font-[900]">
                       {banniere.titre}
                     </h2>
                   </div>
-
 
                   {/* Bouton — affiché uniquement si un lien est défini */}
                   {banniere.lien && (
@@ -146,16 +124,14 @@ export default function BanniereSlider({ bannieres }: BanniereSliderProps) {
                           href={banniere.lien}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-button font-semibold"
-                          style={BUTTON_STYLE}
+                          className={BUTTON_CN}
                         >
                           Découvrir
                         </a>
                       ) : (
                         <Link
                           href={banniere.lien}
-                          className="font-button font-semibold"
-                          style={BUTTON_STYLE}
+                          className={BUTTON_CN}
                         >
                           Découvrir
                         </Link>
