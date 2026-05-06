@@ -11,6 +11,7 @@ export interface MenuItemIcon {
 
 export interface TopMenuItem extends MenuItem {
   topMenuIcon: MenuItemIcon | null;
+  topMenuIconInterne: MenuItemIcon | null;
 }
 
 export const GET_MAIN_MENU = /* GraphQL */ `
@@ -36,6 +37,10 @@ export const GET_TOP_MENU = /* GraphQL */ `
           sourceUrl
           altText
         }
+        topMenuIconInterne {
+          sourceUrl
+          altText
+        }
       }
     }
   }
@@ -49,6 +54,10 @@ export const GET_SOCIAL_MENU = /* GraphQL */ `
         label
         url
         topMenuIcon {
+          sourceUrl
+          altText
+        }
+        topMenuIconInterne {
           sourceUrl
           altText
         }

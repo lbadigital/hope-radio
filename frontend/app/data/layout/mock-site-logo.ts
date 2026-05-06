@@ -7,4 +7,5 @@ export const MOCK_SITE_LOGO: SiteLogoData = {
     sourceUrl: "",
     altText:   'Hope Radio',
   },
+  customLogoInterne: null,
 };

@@ -6,11 +6,19 @@ export interface SiteLogoData {
     sourceUrl: string;
     altText: string;
   } | null;
+  customLogoInterne: {
+    sourceUrl: string;
+    altText: string;
+  } | null;
 }
 
 export const GET_SITE_LOGO = /* GraphQL */ `
   query GetSiteLogo {
     customLogo {
+      sourceUrl
+      altText
+    }
+    customLogoInterne {
       sourceUrl
       altText
     }

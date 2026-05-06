@@ -330,6 +330,18 @@ add_action('graphql_register_types', function () {
         },
     ]);
 
+    register_graphql_field('MenuItem', 'topMenuIconInterne', [
+        'type'    => 'MenuItemIcon',
+        'resolve' => function ($menu_item) {
+            $image = get_field('icone_interne', $menu_item->databaseId);
+            if (empty($image)) return null;
+            return [
+                'sourceUrl' => $image['url'] ?? null,
+                'altText'   => $image['alt'] ?? null,
+            ];
+        },
+    ]);
+
     register_graphql_field('MenuItem', 'reseauxMenuIcon', [
         'type'    => 'MenuItemIcon',
         'resolve' => function ($menu_item) {
@@ -431,12 +443,20 @@ add_filter('acf/location/rule_match/nav_menu_item', function ($match, $rule, $sc
 
 acf_add_local_field_group([
     'key'    => 'group_top_menu_item',
-    'title'  => 'Icône — Top Menu',
+    'title'  => 'Icônes — Top Menu',
     'fields' => [
         [
             'key'           => 'field_top_menu_item_icone',
-            'label'         => 'Icône',
+            'label'         => 'Icône (header transparent)',
             'name'          => 'icone',
+            'type'          => 'image',
+            'return_format' => 'array',
+            'preview_size'  => 'thumbnail',
+        ],
+        [
+            'key'           => 'field_top_menu_item_icone_interne',
+            'label'         => 'Icône — pages internes (header blanc)',
+            'name'          => 'icone_interne',
             'type'          => 'image',
             'return_format' => 'array',
             'preview_size'  => 'thumbnail',
@@ -449,12 +469,20 @@ acf_add_local_field_group([
 
 acf_add_local_field_group([
     'key'    => 'group_reseaux_menu_item',
-    'title'  => 'Icône — Réseaux sociaux',
+    'title'  => 'Icônes — Réseaux sociaux',
     'fields' => [
         [
             'key'           => 'field_reseaux_menu_item_icone',
-            'label'         => 'Icône',
+            'label'         => 'Icône (header transparent)',
             'name'          => 'icone',
+            'type'          => 'image',
+            'return_format' => 'array',
+            'preview_size'  => 'thumbnail',
+        ],
+        [
+            'key'           => 'field_reseaux_menu_item_icone_interne',
+            'label'         => 'Icône — pages internes (header blanc)',
+            'name'          => 'icone_interne',
             'type'          => 'image',
             'return_format' => 'array',
             'preview_size'  => 'thumbnail',
