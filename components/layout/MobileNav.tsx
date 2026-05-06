@@ -12,9 +12,11 @@ interface MobileNavProps {
   socialItems?: TopMenuItem[];
   logoSrc?: string;
   logoAlt?: string;
+  logoInterneSrc?: string;
+  isInternal?: boolean;
 }
 
-export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }: MobileNavProps) {
+export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt, logoInterneSrc, isInternal = false }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = usePlayerStore((s) => s.toggle);
   const isVisible = usePlayerStore((s) => s.isVisible);
@@ -56,25 +58,25 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
           className="col-span-2 justify-self-start cursor-pointer"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="31" height="20" viewBox="0 0 31 20" fill="none" aria-hidden="true">
-            <line y1="1" x2="31" y2="1" stroke="white" strokeWidth="2"/>
-            <line y1="9" x2="31" y2="9" stroke="white" strokeWidth="2"/>
-            <line y1="19" x2="31" y2="19" stroke="white" strokeWidth="2"/>
+            <line y1="1" x2="31" y2="1" stroke={isInternal ? 'black' : 'white'} strokeWidth="2"/>
+            <line y1="9" x2="31" y2="9" stroke={isInternal ? 'black' : 'white'} strokeWidth="2"/>
+            <line y1="19" x2="31" y2="19" stroke={isInternal ? 'black' : 'white'} strokeWidth="2"/>
           </svg>
         </button>
 
         {/* Logo — col-span-6, centré */}
         <Link href="/" className="col-span-6 flex justify-center">
-          {logoSrc ? (
+          {(isInternal ? logoInterneSrc ?? logoSrc : logoSrc) ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={logoSrc}
+              src={(isInternal ? logoInterneSrc ?? logoSrc : logoSrc) as string}
               alt={logoAlt || 'Hope Radio'}
               width={90}
               height={61}
               className="w-[90px] h-auto"
             />
           ) : (
-            <span className="text-white font-nav font-[900] text-[16px]">Hope Radio</span>
+            <span className={`font-nav font-[900] text-[16px] ${isInternal ? 'text-black' : 'text-white'}`}>Hope Radio</span>
           )}
         </Link>
 
@@ -83,7 +85,7 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
           type="button"
           onClick={toggle}
           aria-pressed={isVisible}
-          className="col-span-4 justify-self-end flex items-center gap-[8px] rounded-[30px] bg-secondary text-white font-button text-[14px] font-semibold px-[14px] py-[10px] cursor-pointer"
+          className={`col-span-4 justify-self-end flex items-center gap-[8px] rounded-[30px] text-white font-button text-[14px] font-semibold px-[14px] py-[10px] cursor-pointer ${isInternal ? 'bg-primary' : 'bg-secondary'}`}
         >
           {isVisible ? 'Fermer' : 'La radio'}
           {!isVisible && (
@@ -141,7 +143,7 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
               {socialItems.filter((item) => item.topMenuIcon?.sourceUrl).length > 0 && (
                 <div className="flex gap-4">
                   {socialItems.map((item) => {
-                    const icone = item.topMenuIcon;
+                    const icone = (isInternal ? item.topMenuIconInterne ?? item.topMenuIcon : item.topMenuIcon);
                     if (!icone?.sourceUrl) return null;
                     const external = isExternalUrl(item.url);
                     return (
@@ -166,7 +168,7 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
               )}
               <button
                 type="button"
-                className="rounded-[30px] bg-white text-primary font-button text-[16px] font-semibold h-[50px] px-[30px] py-[10px] cursor-pointer w-full"
+                className={`rounded-[30px] font-button text-[16px] font-semibold h-[50px] px-[30px] py-[10px] cursor-pointer w-full ${isInternal ? 'bg-secondary text-white' : 'bg-white text-primary'}`}
               >
                 Faire un don
               </button>
@@ -174,7 +176,7 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt }:
                 type="button"
                 onClick={() => { toggle(); setIsOpen(false); }}
                 aria-pressed={isVisible}
-                className="rounded-[30px] bg-secondary text-white font-button text-[16px] font-semibold h-[50px] px-[30px] py-[10px] cursor-pointer w-full"
+                className={`rounded-[30px] text-white font-button text-[16px] font-semibold h-[50px] px-[30px] py-[10px] cursor-pointer w-full ${isInternal ? 'bg-primary' : 'bg-secondary'}`}
               >
                 {isVisible ? 'Fermer le lecteur' : 'Écouter le direct'}
               </button>
