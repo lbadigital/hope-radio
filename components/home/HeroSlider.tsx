@@ -29,14 +29,7 @@ const SLIDES: FeaturedSlide[] = transformFeaturedContent(MOCK_FEATURED_CONTENT);
 
 export default function HeroSlider() {
   return (
-    <section
-      className="relative w-full overflow-hidden pt-48 max-w-[980px]:pt-32"
-      style={{
-        backgroundColor: 'var(--color-primary)',
-        backgroundImage: "url('/images/slider-bg.png')",
-        backgroundRepeat: 'repeat',
-      }}
-    >
+    <section className="relative w-full overflow-hidden pt-48 max-w-[980px]:pt-32 bg-primary bg-[url('/images/slider-bg.png')] bg-repeat">
       <Swiper
         modules={[EffectFade, Pagination, Autoplay]}
         effect="fade"
@@ -61,44 +54,17 @@ export default function HeroSlider() {
                   Tag — desktop uniquement.
                   Sur mobile il est repositionné sur l'image (voir ci-dessous).
                 */}
-                <span
-                  className="font-heading font-bold uppercase max-[768px]:hidden"
-                  style={{
-                    width:        'fit-content',
-                    padding:      '15px 30px',
-                    color:        '#FFF',
-                    fontSize:     '16px',
-                    lineHeight:   '20px',
-                    border:       '1px solid #FFF',
-                    borderRadius: '100px',
-                    background:   'transparent',
-                  }}
-                >
+                <span className="font-heading font-bold uppercase max-[768px]:hidden w-fit py-[15px] px-[30px] text-white text-base leading-5 border border-white rounded-full bg-transparent">
                   À la une
                 </span>
 
                 {/* Titre */}
-                <h2
-                  className="font-nav uppercase whitespace-pre-line max-[768px]:text-[32px]"
-                  style={{
-                    color:      '#FFF',
-                    fontSize:   '48px',
-                    fontWeight: 900,
-                    lineHeight: '83%',
-                  }}
-                >
+                <h2 className="font-nav uppercase whitespace-pre-line max-[768px]:text-[32px] text-white text-[48px] font-[900] leading-[83%]">
                   {slide.title}
                 </h2>
 
                 {/* Description */}
-                <p
-                  className="font-heading font-bold uppercase max-[768px]:text-[18px]"
-                  style={{
-                    color:      '#BCBCBC',
-                    fontSize:   '32px',
-                    lineHeight: '100%',
-                  }}
-                >
+                <p className="font-heading font-bold uppercase max-[768px]:text-[18px] text-[#BCBCBC] text-[32px] leading-none">
                   {slide.description}
                 </p>
 
@@ -108,16 +74,7 @@ export default function HeroSlider() {
                   {/* Bouton 1 — vers le contenu */}
                   <Link
                     href={slide.link}
-                    className="font-button font-semibold inline-flex items-center shrink-0 cursor-pointer max-[768px]:w-full max-[768px]:justify-center"
-                    style={{
-                      borderRadius:    '30px',
-                      backgroundColor: '#FFF',
-                      color:           'var(--color-primary)',
-                      fontSize:        '16px',
-                      height:          '50px',
-                      padding:         '10px 30px',
-                      whiteSpace:      'nowrap',
-                    }}
+                    className="font-button font-semibold inline-flex items-center shrink-0 cursor-pointer max-[768px]:w-full max-[768px]:justify-center rounded-[30px] bg-white text-primary text-base h-[50px] px-[30px] py-[10px] whitespace-nowrap"
                   >
                     {CTA_LABELS[slide.type]}
                   </Link>
@@ -125,16 +82,7 @@ export default function HeroSlider() {
                   {/* Bouton 2 — Message en direct */}
                   <button
                     type="button"
-                    className="font-button font-semibold flex items-center gap-3 shrink-0 cursor-pointer max-[768px]:w-full max-[768px]:justify-center"
-                    style={{
-                      borderRadius:    '30px',
-                      backgroundColor: '#5A3D75',
-                      color:           '#FFF',
-                      fontSize:        '14px',
-                      height:          '50px',
-                      padding:         '0 24px',
-                      whiteSpace:      'nowrap',
-                    }}
+                    className="font-button font-semibold flex items-center gap-3 shrink-0 cursor-pointer max-[768px]:w-full max-[768px]:justify-center rounded-[30px] bg-[#5A3D75] text-white text-sm h-[50px] px-6 whitespace-nowrap"
                   >
                     Message en direct
                     <svg
@@ -168,18 +116,7 @@ export default function HeroSlider() {
                 "
               >
                 {/* Tag mobile — positionné en bas à gauche de l'image */}
-                <span
-                  className="hidden max-[980px]:inline-flex font-heading font-bold uppercase absolute bottom-4 left-5 z-10"
-                  style={{
-                    padding:      '10px 20px',
-                    color:        '#FFF',
-                    fontSize:     '14px',
-                    lineHeight:   '20px',
-                    border:       '1px solid #FFF',
-                    borderRadius: '100px',
-                    background:   'transparent',
-                  }}
-                >
+                <span className="hidden max-[980px]:inline-flex font-heading font-bold uppercase absolute bottom-4 left-5 z-10 py-[10px] px-5 text-white text-sm leading-5 border border-white rounded-full bg-transparent">
                   À la une
                 </span>
 
@@ -192,21 +129,8 @@ export default function HeroSlider() {
                   />
                 ) : (
                   /* Placeholder en attente de l'image WordPress */
-                  <div
-                    className="w-full h-full flex items-end justify-center pb-8"
-                    style={{
-                      backgroundColor: 'rgba(255,255,255,0.07)',
-                      borderRadius:    '8px 8px 0 0',
-                    }}
-                  >
-                    <span
-                      className="font-heading uppercase"
-                      style={{
-                        color:         'rgba(255,255,255,0.3)',
-                        fontSize:      '12px',
-                        letterSpacing: '0.15em',
-                      }}
-                    >
+                  <div className="w-full h-full flex items-end justify-center pb-8 bg-[rgba(255,255,255,0.07)] rounded-t-lg">
+                    <span className="font-heading uppercase text-[rgba(255,255,255,0.3)] text-xs tracking-[0.15em]">
                       Image à la une
                     </span>
                   </div>

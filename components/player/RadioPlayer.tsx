@@ -94,19 +94,15 @@ export default function RadioPlayer() {
   const togglePlay = () => setPlaying(!isPlaying);
 
   return (
-    <div
-      className="fixed bottom-0 left-0 w-full z-50 flex items-center py-2"
-      style={{ backgroundColor: '#310C52' }}
-    >
+    <div className="fixed bottom-0 left-0 w-full z-50 flex items-center py-2 bg-[#310C52]">
       {/* ── Desktop layout (≥980px) ── */}
-      <div className="hidden min-[980px]:flex w-full items-center gap-4 px-6" style={{ height: '95px' }}>
+      <div className="hidden min-[980px]:flex w-full items-center gap-4 px-6 h-[95px]">
         {/* Play/Pause */}
         <button
           type="button"
           aria-label={isLoading ? 'Chargement…' : isPlaying ? 'Pause' : 'Play'}
           onClick={togglePlay}
-          className="shrink-0 flex items-center justify-center rounded-full bg-secondary cursor-pointer"
-          style={{ width: '72px', height: '72px' }}
+          className="shrink-0 flex items-center justify-center rounded-full bg-secondary cursor-pointer w-[72px] h-[72px]"
         >
           {isLoading ? (
             <div className="w-8 h-8 border-4 border-black/30 border-t-black rounded-full animate-spin" />
@@ -129,31 +125,21 @@ export default function RadioPlayer() {
             alt={meta.title}
             width={95}
             height={95}
-            className="shrink-0 object-cover rounded-md"
-            style={{ width: '95px', height: '95px' }}
+            className="shrink-0 object-cover rounded-md w-[95px] h-[95px]"
           />
         ) : (
-          <div className="shrink-0 bg-brand-violet" style={{ width: '95px', height: '95px' }} />
+          <div className="shrink-0 bg-brand-violet w-[95px] h-[95px]" />
         )}
 
         {/* Track info */}
         <div className="flex flex-col justify-center min-w-0 flex-1">
-          <span
-            className="font-nav font-[900] leading-[20px]"
-            style={{ color: '#E85B21', fontSize: '12px' }}
-          >
+          <span className="font-nav font-[900] leading-[20px] text-[#E85B21] text-xs">
             HOPE RADIO - LE DIRECT
           </span>
-          <span
-            className="font-nav font-[900] leading-[110%] truncate"
-            style={{ color: '#fff', fontSize: '28px' }}
-          >
+          <span className="font-nav font-[900] leading-[110%] truncate text-white text-[28px]">
             {meta?.title ?? '—'}
           </span>
-          <span
-            className="font-heading font-[700] leading-[116%] uppercase truncate pt-2"
-            style={{ color: '#fff', fontSize: '10px' }}
-          >
+          <span className="font-heading font-[700] leading-[116%] uppercase truncate pt-2 text-white text-[10px]">
             {meta?.artist ?? ''}
           </span>
         </div>
@@ -196,8 +182,7 @@ export default function RadioPlayer() {
         {/* Réagissez en direct */}
         <button
           type="button"
-          className="shrink-0 flex items-center gap-3 rounded-[30px] text-white font-button font-semibold text-[14px] px-[24px] h-[50px] cursor-pointer"
-          style={{ backgroundColor: '#5A3D75' }}
+          className="shrink-0 flex items-center gap-3 rounded-[30px] text-white font-button font-semibold text-[14px] px-[24px] h-[50px] cursor-pointer bg-[#5A3D75]"
         >
           Réagissez en direct
           <svg xmlns="http://www.w3.org/2000/svg" width="26" height="19" viewBox="0 0 26 19" fill="none">
@@ -207,7 +192,7 @@ export default function RadioPlayer() {
       </div>
 
       {/* ── Mobile layout (<980px) ── */}
-      <div className="flex min-[980px]:hidden w-full items-center gap-3 px-4" style={{ height: '85px' }}>
+      <div className="flex min-[980px]:hidden w-full items-center gap-3 px-4 h-[85px]">
         {/* Cover */}
         {meta?.coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -216,31 +201,21 @@ export default function RadioPlayer() {
             alt={meta.title}
             width={65}
             height={65}
-            className="shrink-0 object-cover"
-            style={{ width: '65px', height: '65px' }}
+            className="shrink-0 object-cover w-[65px] h-[65px]"
           />
         ) : (
-          <div className="shrink-0 bg-brand-violet" style={{ width: '65px', height: '65px' }} />
+          <div className="shrink-0 bg-brand-violet w-[65px] h-[65px]" />
         )}
 
         {/* Track info */}
         <div className="flex flex-col justify-center min-w-0 flex-1">
-          <span
-            className="font-nav font-[900] leading-[20px]"
-            style={{ color: '#E85B21', fontSize: '12px' }}
-          >
+          <span className="font-nav font-[900] leading-[20px] text-[#E85B21] text-xs">
             Le direct
           </span>
-          <span
-            className="font-nav font-[900] leading-[110%] truncate"
-            style={{ color: '#fff', fontSize: '20px' }}
-          >
+          <span className="font-nav font-[900] leading-[110%] truncate text-white text-xl">
             {meta?.title ?? '—'}
           </span>
-          <span
-            className="font-heading font-[700] leading-[116%] uppercase truncate"
-            style={{ color: '#fff', fontSize: '10px' }}
-          >
+          <span className="font-heading font-[700] leading-[116%] uppercase truncate text-white text-[10px]">
             {meta?.artist ?? ''}
           </span>
         </div>
@@ -249,8 +224,7 @@ export default function RadioPlayer() {
         <button
           type="button"
           aria-label="Réagissez en direct"
-          className="shrink-0 flex items-center justify-center rounded-full cursor-pointer"
-          style={{ backgroundColor: '#5A3D75', width: '56px', height: '56px' }}
+          className="shrink-0 flex items-center justify-center rounded-full cursor-pointer bg-[#5A3D75] w-14 h-14"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="26" height="19" viewBox="0 0 26 19" fill="none">
             <path d="M19 0C22.866 1.93277e-07 26 3.13401 26 7C26 10.866 22.866 14 19 14H8.16504L6 19L3.4043 13.0059C1.3652 11.7824 0 9.55105 0 7C0 3.13401 3.13401 1.93277e-07 7 0H19Z" fill="white"/>
@@ -262,8 +236,7 @@ export default function RadioPlayer() {
           type="button"
           aria-label={isLoading ? 'Chargement…' : isPlaying ? 'Pause' : 'Play'}
           onClick={togglePlay}
-          className="shrink-0 flex items-center justify-center rounded-full bg-secondary cursor-pointer"
-          style={{ width: '56px', height: '56px' }}
+          className="shrink-0 flex items-center justify-center rounded-full bg-secondary cursor-pointer w-14 h-14"
         >
           {isLoading ? (
             <div className="w-7 h-7 border-4 border-black/30 border-t-black rounded-full animate-spin" />

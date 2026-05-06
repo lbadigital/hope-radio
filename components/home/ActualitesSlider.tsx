@@ -18,69 +18,27 @@ function ActualiteCardItem({ card }: { card: ActualiteCard }) {
   return (
     <Link
       href={card.uri}
-      className="actualite-card"
-      style={{
-        display:        'flex',
-        flexDirection:  'column',
-        gap:            '8px',
-        textDecoration: 'none',
-        color:          'inherit',
-        cursor:         'pointer',
-      }}
+      className="actualite-card group flex flex-col gap-2 no-underline text-inherit cursor-pointer"
     >
       {/* Thumbnail */}
-      <div
-        style={{
-          width:        '100%',
-          aspectRatio:  '186/95',
-          overflow:     'hidden',
-          borderRadius: '1rem',
-        }}
-      >
+      <div className="w-full aspect-[186/95] overflow-hidden rounded-2xl">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={card.image.url}
           alt={card.image.alt}
-          className="actualite-card__image"
-          style={{
-            width:      '100%',
-            height:     '100%',
-            objectFit:  'cover',
-            display:    'block',
-            transform:  'scale(1.05)',
-            transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          }}
+          className="actualite-card__image w-full h-full object-cover block scale-105 transition-transform duration-[400ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-100"
         />
       </div>
 
       {/* Catégorie */}
       {card.category && (
-        <span
-          style={{
-            color:         '#E85B21',
-            fontFamily:    'var(--font-heading)',
-            fontSize:      '12px',
-            fontWeight:    700,
-            lineHeight:    '22px',
-            textTransform: 'uppercase',
-          }}
-        >
+        <span className="text-[#E85B21] font-heading text-xs font-bold leading-[22px] uppercase">
           {card.category}
         </span>
       )}
 
       {/* Excerpt */}
-      <p
-        style={{
-          color:         '#000',
-          fontFamily:    'var(--font-heading)',
-          fontSize:      '16px',
-          fontWeight:    700,
-          lineHeight:    '22px',
-          textTransform: 'uppercase',
-          margin:        0,
-        }}
-      >
+      <p className="text-black font-heading text-base font-bold leading-[22px] uppercase m-0">
         {card.excerpt || card.title}
       </p>
     </Link>
@@ -103,8 +61,7 @@ export default function ActualitesSlider({ cards }: ActualitesSliderProps) {
             spaceBetween:  30,
           },
         }}
-        className="actualites-slider"
-        style={{ paddingBottom: '0' }}
+        className="actualites-slider pb-0"
       >
         {cards.map((card) => (
           <SwiperSlide key={card.uri}>
@@ -114,23 +71,10 @@ export default function ActualitesSlider({ cards }: ActualitesSliderProps) {
       </Swiper>
 
       {/* Lien "Toutes les actualités" — centré sous le slider */}
-      <div style={{ textAlign: 'center', marginTop: '16px' }}>
+      <div className="text-center mt-4">
         <Link
           href="/actualites"
-          style={{
-            display:        'inline-flex',
-            width:          '205px',
-            height:         '31px',
-            flexDirection:  'column',
-            justifyContent: 'center',
-            textAlign:      'center',
-            fontFamily:     'var(--font-heading)',
-            fontSize:       '14px',
-            fontWeight:     700,
-            textTransform:  'uppercase',
-            textDecoration: 'underline',
-            color:          '#000',
-          }}
+          className="inline-flex w-[205px] h-[31px] flex-col justify-center text-center font-heading text-sm font-bold uppercase underline text-black"
         >
           Toutes les actualités
         </Link>

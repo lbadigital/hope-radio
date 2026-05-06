@@ -83,6 +83,13 @@ body {
   font-family: var(--font-body);
 }
 
+.container {
+  max-width: 1139px;
+  margin: 0 auto;
+  padding: 0 32px;
+  width: 100%;
+}
+
 /* ── HeroSlider — Swiper overrides + responsive ─────────────────────────── */
 
 .hero-slider .swiper-pagination {

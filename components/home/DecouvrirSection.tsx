@@ -36,15 +36,8 @@ export default async function DecouvrirSection({
   if (slots.length === 0) return null;
 
   return (
-    <section className="decouvrir-section">
+    <section className="w-full py-12 bg-secondary overflow-hidden">
       <style>{`
-        .decouvrir-section {
-          width:            100%;
-          padding:          48px 0;
-          background-color: #E45612;
-          overflow:         hidden;
-        }
-
         /* Aligne le bord gauche du slider sur le contenu du container,
            sans contraindre le bord droit — le slider déborde jusqu'au viewport. */
         .decouvrir-slider-outer {
@@ -79,50 +72,14 @@ export default async function DecouvrirSection({
       <div className="container">
 
         {/* ── En-tête du bloc ── */}
-        <div
-          style={{
-            display:        'flex',
-            justifyContent: 'space-between',
-            alignItems:     'center',
-            marginBottom:   '32px',
-          }}
-        >
-          <h2
-            style={{
-              display:        'flex',
-              width:          '625px',
-              height:         '59px',
-              flexDirection:  'column',
-              justifyContent: 'center',
-              fontFamily:     'var(--font-nav)',
-              fontWeight:     900,
-              fontSize:       '48px',
-              lineHeight:     '1',
-              textTransform:  'uppercase',
-              margin:         0,
-              color:          '#FFF',
-              flexGrow:       1,
-            }}
-          >
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="flex w-[625px] h-[59px] flex-col justify-center font-nav font-[900] text-[48px] leading-none uppercase m-0 text-white grow">
             {title}
           </h2>
 
           <Link
             href="/grille"
-            style={{
-              display:        'flex',
-              width:          '205px',
-              height:         '31px',
-              flexDirection:  'column',
-              justifyContent: 'center',
-              textAlign:      'right',
-              fontFamily:     'var(--font-heading)',
-              fontSize:       '14px',
-              fontWeight:     700,
-              textTransform:  'uppercase',
-              textDecoration: 'underline',
-              color:          '#FFF',
-            }}
+            className="flex w-[205px] h-[31px] flex-col justify-center text-right font-heading text-sm font-bold uppercase underline text-white"
           >
             Grille des programmes
           </Link>
