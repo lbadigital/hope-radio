@@ -30,9 +30,6 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ]
-  },
-  images: {
-    unoptimized: true,
   }
 };
 
