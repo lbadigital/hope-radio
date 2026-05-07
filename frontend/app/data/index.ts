@@ -21,7 +21,7 @@ export { transformActualites }                from './actualites/transformer';
 export type { ActualiteCard }                 from './actualites/transformer';
 
 // Grille
-export { MOCK_GRILLE_SLOTS }                  from './grille/mock-grille';
+export { MOCK_GRILLE_SLOTS, MOCK_WEEK_DATES } from './grille/mock-grille';
 export { transformGrilleSlots }               from './grille/transformer';
 export type { EmissionSlot }                  from './grille/transformer';
 

@@ -308,6 +308,33 @@ acf_add_local_field_group([
     ],
 ]);
 
+// Expose les animateurs d'une émission via un resolver explicite.
+// ACF relationship → liste plate AnimateurBasic { prenom nom }.
+add_action('graphql_register_types', function () {
+    register_graphql_object_type('AnimateurBasic', [
+        'description' => 'Animateur simplifié (prénom + nom) pour la grille',
+        'fields'      => [
+            'prenom' => ['type' => 'String'],
+            'nom'    => ['type' => 'String'],
+        ],
+    ]);
+
+    register_graphql_field('Emission', 'animateurs', [
+        'type'        => ['list_of' => 'AnimateurBasic'],
+        'description' => 'Animateurs liés à cette émission',
+        'resolve'     => function ($emission) {
+            $items = get_field('animateurs', $emission->databaseId);
+            if (empty($items) || !is_array($items)) return [];
+            return array_map(function ($a) {
+                return [
+                    'prenom' => get_field('prenom', $a->ID) ?? '',
+                    'nom'    => get_field('nom', $a->ID)    ?? '',
+                ];
+            }, $items);
+        },
+    ]);
+});
+
 // WPGraphQL for ACF ne sait pas résoudre les champs sur MenuItem.
 // On enregistre les champs directement via l'API WPGraphQL avec un resolver explicite.
 add_action('graphql_register_types', function () {

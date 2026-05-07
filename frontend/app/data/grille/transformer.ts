@@ -1,13 +1,16 @@
 import type { GetGrilleSlotsData } from '@/graphql/grille';
 
 export interface EmissionSlot {
-  id:         string; // clé synthétique : heureDebut + heureFin
+  id:         string;
+  slotDate:   string;
   heureDebut: string;
   heureFin:   string;
   title:      string;
   category:   string | null;
   image:      { url: string; alt: string };
   uri:        string;
+  excerpt:    string | null;
+  animateur:  string | null;
 }
 
 export function transformGrilleSlots(data: GetGrilleSlotsData): EmissionSlot[] {
@@ -15,8 +18,13 @@ export function transformGrilleSlots(data: GetGrilleSlotsData): EmissionSlot[] {
     .filter((slot) => slot.emission !== null)
     .map((slot) => {
       const emission = slot.emission!;
+      const animateurNode = emission.animateurs?.[0];
+      const animateur = animateurNode
+        ? `${animateurNode.prenom} ${animateurNode.nom}`.trim()
+        : null;
       return {
-        id:         `${slot.heureDebut}-${slot.heureFin}`,
+        id:         `${slot.slotDate}-${slot.heureDebut}-${slot.heureFin}`,
+        slotDate:   slot.slotDate,
         heureDebut: slot.heureDebut,
         heureFin:   slot.heureFin,
         title:      emission.title,
@@ -25,7 +33,9 @@ export function transformGrilleSlots(data: GetGrilleSlotsData): EmissionSlot[] {
           url: emission.featuredImage?.node.sourceUrl ?? '',
           alt: emission.featuredImage?.node.altText  ?? emission.title,
         },
-        uri: emission.uri,
+        uri:        emission.uri,
+        excerpt:    emission.excerpt ?? null,
+        animateur,
       };
     });
 }

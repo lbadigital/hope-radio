@@ -31,7 +31,7 @@ add_action('init', function () {
         'public'              => true,
         'has_archive'         => true,
         'rewrite'             => ['slug' => 'emissions'],
-        'supports'            => ['title', 'editor', 'thumbnail'],
+        'supports'            => ['title', 'editor', 'excerpt', 'thumbnail'],
         'menu_icon'           => 'dashicons-microphone',
         'show_in_rest'        => true,
         'show_in_graphql'     => true,
