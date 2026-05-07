@@ -30,7 +30,7 @@ export default async function GrillePage() {
     const data = await fetchGraphQL<GetGrilleSlotsData>(
       GET_GRILLE_SLOTS,
       { dateDebut: weekDates[0], dateFin: weekDates[6] },
-      { cache: 'no-store' },
+      { next: { revalidate: 3600 } },
     );
     slots     = transformGrilleSlots(data);
     usedDates = weekDates;

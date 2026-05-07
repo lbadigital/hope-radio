@@ -26,7 +26,7 @@ export default async function DecouvrirSection({
     const data = await fetchGraphQL<GetGrilleSlotsData>(
       GET_GRILLE_SLOTS,
       { dateDebut: today, dateFin: today },
-      { cache: 'no-store' },
+      { next: { revalidate: 3600 } },
     );
     slots = transformGrilleSlots(data);
   } catch {
