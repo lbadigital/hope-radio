@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
+import { getAudio, buildStreamUrl, STREAM_ORIGIN, preWarm, cancelPreWarm } from '@/lib/audioManager';
 
-const STREAM_BASE_URL =
-  process.env.NEXT_PUBLIC_STREAM_URL ?? 'https://stream.hoperadio.fr/hoperadio';
 const STREAM_CONFIG_URL = process.env.NEXT_PUBLIC_STREAM_CONFIG_URL ?? '';
 const POLL_INTERVAL = 30_000;
 
@@ -28,8 +27,19 @@ export default function RadioPlayer() {
   const setMeta = usePlayerStore((s) => s.setMeta);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const preconnectRef = useRef<HTMLLinkElement | null>(null);
+  const preconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [country, setCountry] = useState('FR');
+
+  // Pre-warm the stream on page load; cancel after 30s if still not playing
+  useEffect(() => {
+    preWarm();
+    const timer = setTimeout(() => {
+      if (!usePlayerStore.getState().isPlaying) cancelPreWarm();
+    }, 30_000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Detect user country once via Cloudflare Worker — falls back to 'FR' silently
   useEffect(() => {
@@ -40,11 +50,9 @@ export default function RadioPlayer() {
       .catch(() => {});
   }, []);
 
-  // Create audio element once + écouter les événements de buffering
+  // Attach listeners to the singleton audio element
   useEffect(() => {
-    const audio = new Audio();
-    audio.crossOrigin = 'anonymous';
-    audio.preload = 'none';
+    const audio = getAudio();
     audioRef.current = audio;
 
     const onWaiting = () => setIsLoading(true);
@@ -60,7 +68,10 @@ export default function RadioPlayer() {
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('error',   onError);
       audio.pause();
-      audio.src = ''; // libère immédiatement la connexion réseau au stream
+      audio.src = '';
+      if (preconnectTimerRef.current) clearTimeout(preconnectTimerRef.current);
+      preconnectRef.current?.remove();
+      preconnectRef.current = null;
     };
   }, [setPlaying]);
 
@@ -69,13 +80,34 @@ export default function RadioPlayer() {
     const audio = audioRef.current;
     if (!audio) return;
     if (isPlaying) {
-      // Cache-busting param bypasses mobile carrier proxies that buffer infinite streams
-      audio.src = `${STREAM_BASE_URL}?t=${Date.now()}`;
+      if (preconnectTimerRef.current) {
+        clearTimeout(preconnectTimerRef.current);
+        preconnectTimerRef.current = null;
+      }
+      preconnectRef.current?.remove();
+      preconnectRef.current = null;
+      // Reuse pre-warmed buffer if available, otherwise open a fresh connection.
+      // Cache-busting param bypasses mobile carrier proxies that buffer infinite streams.
+      if (!audio.getAttribute('src')) audio.src = buildStreamUrl();
       setIsLoading(true);
       audio.play().catch(() => { setIsLoading(false); setPlaying(false); });
     } else {
       audio.pause();
       audio.src = '';
+      // Inject a preconnect hint so the next play skips the TCP+TLS handshake
+      if (STREAM_ORIGIN && !preconnectRef.current) {
+        const link = document.createElement('link');
+        link.rel = 'preconnect';
+        link.href = STREAM_ORIGIN;
+        document.head.appendChild(link);
+        preconnectRef.current = link;
+      }
+      if (preconnectTimerRef.current) clearTimeout(preconnectTimerRef.current);
+      preconnectTimerRef.current = setTimeout(() => {
+        preconnectRef.current?.remove();
+        preconnectRef.current = null;
+        preconnectTimerRef.current = null;
+      }, 30_000);
     }
   }, [isPlaying, setPlaying]);
 
