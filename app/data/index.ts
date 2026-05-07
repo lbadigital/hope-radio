@@ -29,3 +29,8 @@ export type { EmissionSlot }                  from './grille/transformer';
 export { MOCK_BANNIERES }                     from './bannieres/mock-bannieres';
 export { transformBannieres }                 from './bannieres/transformer';
 export type { BanniereCard }                  from './bannieres/transformer';
+
+// Émissions
+export { MOCK_EMISSIONS, MOCK_EMISSION_CATEGORIES } from './emissions/mock-emissions';
+export { transformEmissions }                       from './emissions/transformer';
+export type { EmissionCard, EmissionPageInfo }      from './emissions/transformer';

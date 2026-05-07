@@ -1,7 +1,17 @@
 import Image from 'next/image';
 import Link  from 'next/link';
 
-import type { EmissionSlot } from '@/app/data';
+export interface CardData {
+  id:         string;
+  title:      string;
+  category:   string | null;
+  image:      { url: string; alt: string };
+  uri:        string;
+  excerpt:    string | null;
+  animateur:  string | null;
+  heureDebut?: string;
+  heureFin?:   string;
+}
 
 function formatTime(time: string): string {
   const [h, m] = time.split(':');
@@ -9,8 +19,10 @@ function formatTime(time: string): string {
   return m === '00' ? `${hour}h` : `${hour}h${m}`;
 }
 
-export default function GrilleCard({ slot }: { slot: EmissionSlot }) {
-  const horaire = `${formatTime(slot.heureDebut)} > ${formatTime(slot.heureFin)}`;
+export default function GrilleCard({ slot }: { slot: CardData }) {
+  const horaire = slot.heureDebut && slot.heureFin
+    ? `${formatTime(slot.heureDebut)} > ${formatTime(slot.heureFin)}`
+    : null;
   const excerpt  = slot.excerpt ? slot.excerpt.replace(/<[^>]+>/g, '') : null;
 
   return (
@@ -35,9 +47,11 @@ export default function GrilleCard({ slot }: { slot: EmissionSlot }) {
       <div className="flex flex-col rounded-[20px] bg-white flex-grow justify-between items-start p-8 md:w-[649px] md:h-[399px] md:p-[60px]">
         <div className="flex flex-col gap-5">
             {/* Horaire */}
-            <p className="font-nav font-[900] text-[28px] leading-[110%] text-primary m-0">
+            {horaire && (
+              <p className="font-nav font-[900] text-[28px] leading-[110%] text-primary m-0">
                 {horaire}
-            </p>
+              </p>
+            )}
 
             {/* Titre */}
             <h2 className="font-nav font-[900] text-[48px] leading-[83%] text-[#31251A] m-0">
