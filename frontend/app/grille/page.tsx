@@ -43,9 +43,9 @@ export default async function GrillePage() {
 
   return (
     <main className="bg-brand-violet min-h-screen py-16">
-      <div className="container lg:max-w-[1139px] mx-auto">
+      <div className="container px-6 lg:px-0 lg:max-w-[1139px] mx-auto">
 
-        <h1 className="font-nav font-[900] text-[88px] leading-[90%] text-white text-center mb-10 uppercase">
+        <h1 className="font-nav font-[900] text-4xl md:text-[88px] leading-[90%] text-white text-center mb-10 uppercase">
           Grille des programmes
         </h1>
 

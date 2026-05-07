@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import type { EmissionSlot } from '@/app/data';
 import GrilleCard from './GrilleCard';
@@ -15,6 +15,12 @@ interface GrilleClientProps {
 
 export default function GrilleClient({ slots, weekDates, defaultDate }: GrilleClientProps) {
   const [selectedDate, setSelectedDate] = useState(defaultDate);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const activeButtonRef    = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    activeButtonRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, []);
 
   const filteredSlots = slots.filter((s) => s.slotDate === selectedDate);
 
@@ -22,20 +28,23 @@ export default function GrilleClient({ slots, weekDates, defaultDate }: GrilleCl
     <div>
 
       {/* Filtres jours */}
-      <div className="flex flex-wrap gap-3 justify-center mb-10">
-        {weekDates.map((date, i) => (
-          <button
-            key={date}
-            onClick={() => setSelectedDate(date)}
-            className={`px-[30px] pb-[5px] pt-[3px] rounded-[40px] border font-heading font-bold text-sm transition-colors cursor-pointer ${
-              selectedDate === date
-                ? 'bg-white text-brand-violet border-white'
-                : 'bg-transparent text-white border-white hover:bg-white/10'
-            }`}
-          >
-            {JOURS[i]}
-          </button>
-        ))}
+      <div ref={scrollContainerRef} className="overflow-x-auto scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 mb-10">
+        <div className="flex gap-3 w-max md:w-auto md:flex-wrap md:justify-center">
+          {weekDates.map((date, i) => (
+            <button
+              key={date}
+              ref={date === defaultDate ? activeButtonRef : undefined}
+              onClick={() => setSelectedDate(date)}
+              className={`shrink-0 px-[30px] pb-[5px] pt-[3px] rounded-[40px] border font-heading font-bold text-sm transition-colors cursor-pointer ${
+                selectedDate === date
+                  ? 'bg-white text-brand-violet border-white'
+                  : 'bg-transparent text-white border-white hover:bg-white/10'
+              }`}
+            >
+              {JOURS[i]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Liste des émissions */}
