@@ -17,7 +17,7 @@ export default function GrilleCard({ slot }: { slot: EmissionSlot }) {
     <article className="flex flex-col md:flex-row gap-4   overflow-hidden">
 
       {/* Image */}
-      <div className="relative rounded-[20px] overflow-hidden w-full h-[260px] md:w-[370px] md:h-[399px] md:shrink-0">
+      <div className="relative rounded-[20px] overflow-hidden w-full h-[260px] md:w-[399px] md:h-[399px] md:aspect-square    md:shrink-0">
         {slot.image.url ? (
           <Image
             src={slot.image.url}
@@ -32,31 +32,33 @@ export default function GrilleCard({ slot }: { slot: EmissionSlot }) {
       </div>
 
       {/* Contenu */}
-      <div className="flex flex-col rounded-[20px] bg-white flex-grow justify-center items-start gap-5 p-8 md:w-[649px] md:h-[399px] md:p-[60px]">
+      <div className="flex flex-col rounded-[20px] bg-white flex-grow justify-between items-start p-8 md:w-[649px] md:h-[399px] md:p-[60px]">
+        <div className="flex flex-col gap-5">
+            {/* Horaire */}
+            <p className="font-nav font-[900] text-[28px] leading-[110%] text-primary m-0">
+                {horaire}
+            </p>
 
-        {/* Horaire */}
-        <p className="font-nav font-[900] text-[28px] leading-[110%] text-primary m-0">
-          {horaire}
-        </p>
+            {/* Titre */}
+            <h2 className="font-nav font-[900] text-[48px] leading-[83%] text-[#31251A] m-0">
+                {slot.title}
+            </h2>
 
-        {/* Titre */}
-        <h2 className="font-nav font-[900] text-[48px] leading-[83%] text-[#31251A] m-0">
-          {slot.title}
-        </h2>
+            {/* Animateur */}
+            {slot.animateur && (
+                <p className="font-heading text-[14px] font-bold leading-[124%] text-[#31251A] uppercase m-0">
+                    Avec {slot.animateur}
+                </p>
+            )}
 
-        {/* Animateur */}
-        {slot.animateur && (
-          <p className="font-heading text-[14px] font-bold leading-[124%] text-[#31251A] uppercase m-0">
-            Avec {slot.animateur}
-          </p>
-        )}
+            {/* Extrait */}
+            {excerpt && (
+                <p className="text-[12px] font-normal leading-[25px] text-[#31251A] capitalize m-0 line-clamp-3">
+                    {excerpt}
+                </p>
+            )}
+        </div>
 
-        {/* Extrait */}
-        {excerpt && (
-          <p className="text-[12px] font-normal leading-[25px] text-[#31251A] capitalize m-0 line-clamp-3">
-            {excerpt}
-          </p>
-        )}
 
         {/* Bouton */}
         <Link
