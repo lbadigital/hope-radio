@@ -1,5 +1,11 @@
 export async function GET(request: Request) {
-  const res = await fetch('http://hoperadiofrance.fr/meta/', { next: { revalidate: 0 } });
+  const country = new URL(request.url).searchParams.get('country');
+  const metaUrl =
+    country === 'CH'
+      ? 'http://hoperadiofrance.fr/meta/ch/'
+      : 'http://hoperadiofrance.fr/meta/';
+
+  const res = await fetch(metaUrl, { next: { revalidate: 0 } });
   let text = await res.text();
 
   // Le serveur source est HTTP uniquement — on réécrit les URLs de cover

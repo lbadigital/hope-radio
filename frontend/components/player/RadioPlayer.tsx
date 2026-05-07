@@ -5,6 +5,7 @@ import { usePlayerStore } from '@/store/playerStore';
 
 const STREAM_BASE_URL =
   process.env.NEXT_PUBLIC_STREAM_URL ?? 'https://stream.hoperadio.fr/hoperadio';
+const STREAM_CONFIG_URL = process.env.NEXT_PUBLIC_STREAM_CONFIG_URL ?? '';
 const POLL_INTERVAL = 30_000;
 
 function parseXmlMeta(xml: string) {
@@ -28,6 +29,16 @@ export default function RadioPlayer() {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [country, setCountry] = useState('FR');
+
+  // Detect user country once via Cloudflare Worker — falls back to 'FR' silently
+  useEffect(() => {
+    if (!STREAM_CONFIG_URL) return;
+    fetch(STREAM_CONFIG_URL)
+      .then((r) => r.json())
+      .then((data: { country: string }) => setCountry(data.country))
+      .catch(() => {});
+  }, []);
 
   // Create audio element once + écouter les événements de buffering
   useEffect(() => {
@@ -77,7 +88,7 @@ export default function RadioPlayer() {
   useEffect(() => {
     async function fetchMeta() {
       try {
-        const res = await fetch('/api/radio-meta');
+        const res = await fetch(`/api/radio-meta?country=${country}`);
         const xml = await res.text();
         setMeta(parseXmlMeta(xml));
       } catch {
@@ -87,7 +98,7 @@ export default function RadioPlayer() {
     fetchMeta();
     const id = setInterval(fetchMeta, POLL_INTERVAL);
     return () => clearInterval(id);
-  }, [setMeta]);
+  }, [setMeta, country]);
 
   if (!isVisible) return null;
 

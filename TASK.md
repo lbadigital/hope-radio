@@ -1,3 +1,16 @@
+# Tasks — Flux Radio Suisse
+
+## En cours
+(vide)
+
+## Terminé
+- [x] Étape 1 : Cloudflare Worker — routing CH + route /stream-config
+- [x] Étape 2 : Next.js /api/radio-meta — support ?country=CH
+- [x] Étape 3 : RadioPlayer — appel /stream-config + pays dans le poll meta
+- [x] Étape 4 : Déploiement wrangler deploy
+
+---
+
 # TASK — Grille des programmes : migration vers événements datés
 
 > Restructuration complète du module `grille/`.
