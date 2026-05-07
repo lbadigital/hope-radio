@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { MenuItem } from '@/graphql/menus';
 import { normalizeMenuUrl } from '@/lib/wordpress';
 import { usePlayerStore } from '@/store/playerStore';
+import { preWarm } from '@/lib/audioManager';
 
 interface NavMenuProps {
   items: MenuItem[];
@@ -46,6 +47,7 @@ export default function NavMenu({ items, isInternal = false }: NavMenuProps) {
         <button
           type="button"
           onClick={toggle}
+          onMouseEnter={() => { if (!isVisible) preWarm(); }}
           aria-pressed={isVisible}
           className={`rounded-[30px] text-white font-button text-[clamp(12px,1.2vw,16px)] font-semibold w-[203px] min-[1139px]:w-fit xl:w-[203px] h-[50px] px-4 min-[1139px]:px-[30px] py-[10px] cursor-pointer ${isInternal ? 'bg-primary' : 'bg-secondary'}`}
         >

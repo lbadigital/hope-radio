@@ -6,6 +6,7 @@ import Image from 'next/image';
 import type { MenuItem, TopMenuItem } from '@/graphql/menus';
 import { normalizeMenuUrl, isExternalUrl } from '@/lib/wordpress';
 import { usePlayerStore } from '@/store/playerStore';
+import { preWarm } from '@/lib/audioManager';
 
 interface MobileNavProps {
   items: MenuItem[];
@@ -84,6 +85,7 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt, l
         <button
           type="button"
           onClick={toggle}
+          onTouchStart={() => { if (!isVisible) preWarm(); }}
           aria-pressed={isVisible}
           className={`col-span-4 justify-self-end flex items-center gap-[8px] rounded-[30px] text-white font-button text-[14px] font-semibold px-[14px] py-[10px] cursor-pointer ${isInternal ? 'bg-primary' : 'bg-secondary'}`}
         >
@@ -175,6 +177,7 @@ export default function MobileNav({ items, socialItems = [], logoSrc, logoAlt, l
               <button
                 type="button"
                 onClick={() => { toggle(); setIsOpen(false); }}
+                onTouchStart={() => { if (!isVisible) preWarm(); }}
                 aria-pressed={isVisible}
                 className={`rounded-[30px] text-white font-button text-[16px] font-semibold h-[50px] px-[30px] py-[10px] cursor-pointer w-full ${isInternal ? 'bg-primary' : 'bg-secondary'}`}
               >
