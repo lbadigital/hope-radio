@@ -8,12 +8,13 @@ import GrilleCard from './GrilleCard';
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
 interface GrilleClientProps {
-  slots:     EmissionSlot[];
-  weekDates: string[];
+  slots:       EmissionSlot[];
+  weekDates:   string[];
+  defaultDate: string;
 }
 
-export default function GrilleClient({ slots, weekDates }: GrilleClientProps) {
-  const [selectedDate, setSelectedDate] = useState(weekDates[0]);
+export default function GrilleClient({ slots, weekDates, defaultDate }: GrilleClientProps) {
+  const [selectedDate, setSelectedDate] = useState(defaultDate);
 
   const filteredSlots = slots.filter((s) => s.slotDate === selectedDate);
 
