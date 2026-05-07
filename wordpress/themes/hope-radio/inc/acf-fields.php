@@ -231,6 +231,31 @@ acf_add_local_field_group([
     ],
 ]);
 
+// ── Paramètres techniques ────────────────────────────────────────────────────
+
+acf_add_local_field_group([
+    'key'    => 'group_parametres_techniques',
+    'title'  => 'Paramètres techniques',
+    'fields' => [
+        [
+            'key'   => 'field_tab_parametres',
+            'label' => 'Technique',
+            'type'  => 'tab',
+        ],
+        [
+            'key'          => 'field_next_frontend_url',
+            'label'        => 'URL du site public (Next.js)',
+            'name'         => 'next_frontend_url',
+            'type'         => 'url',
+            'instructions' => 'Ex : https://www.hoperadiofrance.fr — utilisée pour invalider le cache à chaque publication.',
+            'required'     => 0,
+        ],
+    ],
+    'location' => [
+        [['param' => 'options_page', 'operator' => '==', 'value' => 'theme-options']],
+    ],
+]);
+
 // ── Promotions (bannières — option de thème) ─────────────────────────────────
 //
 // Les bannières sont gérées comme option de thème (non liées à un CPT).

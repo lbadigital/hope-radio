@@ -11,12 +11,12 @@ export default async function EmissionsPage() {
     fetchGraphQL<GetEmissionCategoriesData>(
       GET_EMISSION_CATEGORIES,
       {},
-      { cache: 'no-store' },
+      { next: { revalidate: 3600 } },
     ),
     fetchGraphQL<GetEmissionsData>(
       GET_EMISSIONS_ALL,
       { first: 4, after: null },
-      { cache: 'no-store' },
+      { next: { revalidate: 3600 } },
     ),
   ]);
 
