@@ -22,7 +22,7 @@ export default function HeaderShell({ mainItems, topItems, socialItems, logo, lo
   const activeLogo = isInternal ? (logoInterne ?? logo) : logo;
 
   return (
-    <header className={`z-40 absolute top-0 left-0 right-0 w-full px-4 md:px-8 py-4 flex flex-col gap-[20px]${isInternal ? ' bg-white' : ''}`}>
+    <header className={`z-40 ${isInternal ? 'relative' : 'absolute'} top-0 left-0 right-0 w-full px-4 md:px-8 py-4 flex flex-col gap-[20px]${isInternal ? ' bg-white' : ''}`}>
 
       {/* Mobile / tablette portrait (< 1139px) */}
       <div className="min-[1139px]:hidden">
